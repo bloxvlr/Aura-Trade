@@ -103,8 +103,9 @@ function redirectIfLoggedIn(destination = 'index.html') {
 
 function initGoogleAuth({ onSuccess, onError } = {}) {
     google.accounts.id.initialize({
-        client_id: '452977917704-rodjcu8c5kh9f37rt2oam93necl14emo.apps.googleusercontent.com', // Replace with your client_id
+        client_id: '688061297329-cdikima6fsre1r4k5id9v7qsatqm0diu.apps.googleusercontent.com',
         locale: 'fr',
+
         callback: async (response) => {
             const payload = parseJwt(response.credential);
             if (!payload) { onError?.('Token invalide'); return; }
