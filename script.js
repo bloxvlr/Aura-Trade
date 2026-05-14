@@ -73,14 +73,12 @@ let announces = [];
 let messages = [];
 
 let nextId = 1;
-
-
-let nextId = 1;
 let currentPage = 'home';
 let currentDetailId = null;
 let currentCreateStep = 1;
 let createData = {};
 let activeGameFilter = null;
+
 
 // ==================== NAVIGATION ====================
 function navigate(page, param) {
@@ -174,7 +172,9 @@ function renderHome() {
             </div>
             <div class="carousel-wrap">
                 <button class="carousel-btn prev" onclick="scrollCarousel('featured', -1)">${icons.chevronLeft}</button>
-                <div class="carousel" id="carouselFeatured">${featured.map(a => renderCard(a)).join('')}</div>
+                <div class="carousel" id="carouselFeatured">
+                    ${featured.length > 0 ? featured.map(a => renderCard(a)).join('') : '<p class="empty-msg">Aucune offre à la une pour le moment.</p>'}
+                </div>
                 <button class="carousel-btn next" onclick="scrollCarousel('featured', 1)">${icons.chevronRight}</button>
             </div>
         </section>
@@ -184,81 +184,130 @@ function renderHome() {
                 <h2>${icons.clock} Dernières offres</h2>
                 <span class="section-link" onclick="navigate('explore')">Tout voir ${icons.chevronRight}</span>
             </div>
-            <div class="grid-3">${recent.map(a => renderCard(a)).join('')}</div>
+            <div class="grid-3">
+                ${recent.length > 0 ? recent.map(a => renderCard(a)).join('') : '<p class="empty-msg" style="grid-column: 1 / -1;">Aucune annonce publiée récemment.</p>'}
+            </div>
         </section>
+
     </div>
 `;
 }
 
 function renderDetail(id) {
     const a = announces.find(ann => ann.id === id);
-    if (!a) return '<div class="container"><p style="color:var(--white-50);padding:60px 0;">Annonce introuvable.</p></div>';
-    a.views++;
-    const isLiked = a.likedBy.includes(currentUser.id);
+    if (!a) return '<div class="container"><p style="color:var(--white-50);padding:60px 0;text-align:center;">Annonce introuvable.</p></div>';
+    
+    // Increment views (local simulation)
+    a.views = (a.views || 0) + 1;
+    
+    const isLiked = (a.likedBy || []).includes(currentUser.id);
     const similar = announces.filter(ann => ann.id !== a.id && ann.gameId === a.gameId).slice(0, 4);
+    
     return `
     <div class="container">
-        <a class="back-link" onclick="navigate('explore')">${icons.arrowLeft} Retour aux annonces</a>
+        <a class="back-link" onclick="navigate('explore')">
+            <span class="icon-wrap-sm">${icons.arrowLeft}</span>
+            Retour aux annonces
+        </a>
+        
         <div class="detail-layout">
             <div class="detail-main">
-                <div class="detail-image-lg ${a.rarityClass}">
-                    <span class="item-emoji">${a.imageEmoji}</span>
-                    <span class="card-rarity rarity-${a.rarityClass}" style="position:absolute;top:16px;right:16px;">${a.rarity}</span>
+                <div class="detail-hero-card">
+                    <div class="detail-image-lg ${a.rarityClass}">
+                        <span class="item-emoji-lg">${a.imageEmoji}</span>
+                        <div class="detail-rarity-badge rarity-${a.rarityClass}">${a.rarity}</div>
+                    </div>
+                    
+                    <div class="detail-header-info">
+                        <div class="detail-game-label">${a.gameName}</div>
+                        <h1 class="detail-title-lg">${a.title}</h1>
+                        <div class="detail-meta-row">
+                            <span class="meta-item"><span class="icon-inline">${icons.clock}</span> Publié le ${a.date}</span>
+                            <span class="meta-item"><span class="icon-inline">${icons.eye}</span> ${a.views} vues</span>
+                        </div>
+                    </div>
                 </div>
-                <h2 style="font-size:1.5rem;font-weight:800;color:var(--white);letter-spacing:-0.02em;margin-bottom:4px;">${a.title}</h2>
-                <p style="color:var(--white-50);margin-bottom:12px;">${a.gameName}</p>
-                <p style="line-height:1.65;color:var(--white-70);margin-bottom:16px;">${a.description}</p>
+
+                <div class="detail-content-section">
+                    <h3 class="section-title">Description</h3>
+                    <p class="detail-description-text">${a.description || 'Aucune description fournie.'}</p>
+                </div>
+
+                <div class="detail-content-section highlight-box">
+                    <div class="search-for-header">
+                        <span class="icon-wrap-md">${icons.search}</span>
+                        <h3 class="section-title">Ce que je recherche</h3>
+                    </div>
+                    <p class="search-for-text">${a.searchFor}</p>
+                </div>
+
                 <div class="detail-tags">
                     <span class="tag">${a.gameName}</span>
                     <span class="tag">${a.rarity}</span>
                 </div>
-                <div style="background:var(--bg-tertiary);padding:16px 18px;border-radius:var(--radius-lg);margin-top:16px;border:1px solid var(--border-light);">
-                    <strong style="color:var(--white);">🔍 Recherche :</strong>
-                    <span style="color:var(--white-70);">${a.searchFor}</span>
-                </div>
             </div>
+
             <div class="detail-sidebar">
-                <div class="sidebar-card">
-                    <div class="seller-row">
+                <div class="sidebar-card seller-card">
+                    <div class="seller-header">
                         <div class="avatar-md">${a.sellerAvatar}</div>
-                        <div class="seller-info">
-                            <div class="name">${a.sellerName}</div>
-                            <div class="sub">${icons.star} ${a.sellerRating} · ${a.sellerTrades} échanges</div>
+                        <div class="seller-meta">
+                            <div class="seller-name">${a.sellerName}</div>
+                            <div class="seller-rating">
+                                ${icons.star} <span>${a.sellerRating || '5.0'}</span>
+                                <span class="dot">·</span>
+                                <span>${a.sellerTrades || 0} échanges</span>
+                            </div>
                         </div>
                     </div>
-                    <button class="btn btn-primary btn-block btn-lg" onclick="openContactModal(${a.id})">
-                        ${icons.messageCircle} Je suis intéressé(e)
+                    
+                    <div class="sidebar-actions">
+                        <button class="btn btn-primary btn-block btn-lg" onclick="openContactModal(${a.id})">
+                            <span class="icon-inline">${icons.messageCircle}</span> Proposer un échange
+                        </button>
+                        <button class="btn btn-secondary btn-block" onclick="toggleLike(${a.id})">
+                            <span class="icon-inline">${isLiked ? icons.heartFilled : icons.heart}</span> 
+                            ${isLiked ? 'Retirer des favoris' : 'Ajouter aux favoris'}
+                        </button>
+                    </div>
+                </div>
+
+                <div class="sidebar-card stats-card">
+                    <h4 class="sidebar-title">Informations complémentaires</h4>
+                    <div class="sidebar-stats-list">
+                        <div class="stat-row">
+                            <span class="stat-label">Identifiant</span>
+                            <span class="stat-value">#${a.id}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Popularité</span>
+                            <span class="stat-value"><span class="icon-inline" style="color:var(--danger)">${icons.heart}</span> ${a.likes || 0}</span>
+                        </div>
+                        <div class="stat-row">
+                            <span class="stat-label">Statut</span>
+                            <span class="stat-value status-online">Disponible</span>
+                        </div>
+                    </div>
+                    <button class="btn btn-ghost btn-block mt-4" onclick="shareAnnounce(${a.id})">
+                        <span class="icon-inline">${icons.share}</span> Partager l'annonce
                     </button>
                 </div>
-                <div class="sidebar-card">
-                    <div class="stat-item">${icons.eye} Vues <span class="stat-value">${a.views.toLocaleString()}</span></div>
-                    <div class="stat-item">
-                        <span style="cursor:pointer;display:flex;align-items:center;gap:10px;" onclick="toggleLike(${a.id})">
-                            ${isLiked ? icons.heartFilled.replace('fill="currentColor"','fill="#FF453A" style="color:#FF453A;"') : icons.heart}
-                            Likes
-                        </span>
-                        <span class="stat-value">${a.likes.toLocaleString()}</span>
+
+                <div class="sidebar-card safety-tip-card">
+                    <div class="safety-header">
+                        <span class="icon-wrap-sm" style="color:var(--success)">${icons.shield}</span>
+                        <span>Conseil de sécurité</span>
                     </div>
-                    <div class="stat-item">${icons.clock} Publié <span class="stat-value">${a.date}</span></div>
-                    <button class="btn btn-secondary btn-block mt-4" onclick="shareAnnounce(${a.id})">
-                        ${icons.share} Partager
-                    </button>
+                    <p class="safety-text">Réalisez toujours vos échanges directement dans le jeu Roblox. Ne partagez jamais vos identifiants.</p>
                 </div>
-                ${a.sellerId !== 'user1' ? `
-                <div class="sidebar-card">
-                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
-                        ${icons.shield}
-                        <span style="font-weight:700;color:var(--white);font-size:0.9rem;">Vendeur fiable</span>
-                    </div>
-                    <div style="font-size:0.82rem;color:var(--white-50);">
-                        ${a.sellerTrades} échanges réussis · Note ${a.sellerRating}/5
-                    </div>
-                </div>` : ''}
             </div>
         </div>
+
         ${similar.length > 0 ? `
-        <section class="section" style="margin-top:40px;">
-            <div class="section-header"><h2>📦 Annonces similaires dans ${a.gameName}</h2></div>
+        <section class="section" style="margin-top:60px;">
+            <div class="section-header">
+                <h2>${icons.plus} Annonces similaires</h2>
+            </div>
             <div class="carousel-wrap">
                 <button class="carousel-btn prev" onclick="scrollCarousel('similar', -1)">${icons.chevronLeft}</button>
                 <div class="carousel" id="carouselSimilar">${similar.map(a => renderCard(a)).join('')}</div>
@@ -266,8 +315,9 @@ function renderDetail(id) {
             </div>
         </section>` : ''}
     </div>
-`;
+    `;
 }
+
 
 function renderCreate() {
     const steps = ['Le jeu', 'Ce que je possède', 'Ce que je recherche', 'Récapitulatif'];
