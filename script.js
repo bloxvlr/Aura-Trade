@@ -151,6 +151,7 @@ function renderApp() {
         'admin': renderAdmin,
         'premium': renderPremium,
         'config_premium': renderConfigPremium,
+        'explore': renderExplore,
     };
 
 
@@ -253,6 +254,21 @@ function renderHome() {
 
     </div>
 `;
+}
+
+function renderExplore() {
+    const sorted = [...announces].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
+    return `
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <h2 style="font-size:1.6rem;font-weight:800;color:var(--white);">🔍 Toutes les annonces</h2>
+            <button class="btn btn-secondary" onclick="navigate('home')">Retour à l'accueil</button>
+        </div>
+        <div class="grid-3" style="margin-bottom: 40px;">
+            ${sorted.length > 0 ? sorted.map(a => renderCard(a)).join('') : '<p class="empty-msg" style="grid-column: 1 / -1;">Aucune annonce trouvée.</p>'}
+        </div>
+    </div>
+    `;
 }
 
 function renderDetail(id) {
