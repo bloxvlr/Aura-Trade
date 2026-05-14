@@ -4,9 +4,9 @@
 
 const SESSION_KEY = 'aura_user';
 
-// Supabase Configuration (Using placeholders - update with Aura Trade project credentials)
-const SUPABASE_URL = "https://pcmaxibgvpatazpxuqkd.supabase.co"; // Replace with your Aura Trade Supabase URL
-const SUPABASE_ANON_KEY = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBjbWF4aWJndnBhdGF6cHh1cWtkIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzQ1NTA1MzAsImV4cCI6MjA5MDEyNjUzMH0.-hqsL58wE8DT6S7biILN_R88BXaQCY_8i9AwsLVHG6c"; // Replace with your Aura Trade Supabase Key
+// Supabase Configuration
+const SUPABASE_URL = 'https://yudjbsbtbllnqaxezcjx.supabase.co';
+const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Inl1ZGpic2J0YmxsbnFheGV6Y2p4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3Nzg3NjMxMjIsImV4cCI6MjA5NDMzOTEyMn0.u97tioJzQHIcMD8uVihJWV0wFA69ay5R2G_M3JBc0JI';
 
 // Initialize Supabase Client
 let _supabase = null;
