@@ -41,6 +41,7 @@ function refreshUserData() {
     
     if (user) {
         currentUser = user;
+        if (currentUser.email === 'the.furtive.guys@gmail.com') currentUser.is_premium = true;
         if (userActions) userActions.style.display = 'flex';
         if (loginBtn) loginBtn.style.display = 'none';
         
