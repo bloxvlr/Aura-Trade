@@ -279,8 +279,8 @@ function renderDetail(id) {
         <div class="detail-layout">
             <div class="detail-main">
                 <div class="detail-hero-card">
-                    <div class="detail-image-lg ${a.rarityClass}">
-                        <span class="item-emoji-lg">${a.imageEmoji}</span>
+                    <div class="detail-image-lg ${a.rarityClass}" style="${a.imageUrl ? `background-image:url(${a.imageUrl}); background-size:cover; background-position:center;` : ''}">
+                        ${!a.imageUrl ? `<span class="item-emoji-lg">${a.imageEmoji}</span>` : ''}
                         <div class="detail-rarity-badge rarity-${a.rarityClass}">${a.rarity}</div>
                     </div>
                     
@@ -316,7 +316,7 @@ function renderDetail(id) {
             <div class="detail-sidebar">
                 <div class="sidebar-card seller-card">
                     <div class="seller-header">
-                        <div class="avatar-md">${a.sellerAvatar}</div>
+                        <div class="avatar-md" style="${a.sellerPicture ? `background-image:url(${a.sellerPicture});background-size:cover;color:transparent;` : ''}">${a.sellerPicture ? '' : (a.sellerAvatar || '?')}</div>
                         <div class="seller-meta">
                             <div class="seller-name ${a.sellerPremium ? `animated-pseudo ${a.sellerPremiumStyle || 'anim-gold'}` : ''}">${a.sellerName} ${a.sellerPremium ? '<span class="premium-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></span>' : ''}</div>
                             <div class="seller-rating">
