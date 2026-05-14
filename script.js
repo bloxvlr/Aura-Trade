@@ -83,7 +83,7 @@ let activeGameFilter = null;
 // ==================== NAVIGATION ====================
 function navigate(page, param) {
     // Pages requiring authentication
-    const authRequired = ['detail', 'create', 'messages', 'profile'];
+    const authRequired = ['detail', 'create', 'messages', 'profile', 'favorites', 'settings'];
     if (authRequired.includes(page) && !AuraAuth.getUser()) {
         window.location.href = 'login.html';
         return;
@@ -92,11 +92,22 @@ function navigate(page, param) {
     currentPage = page;
     if (page === 'detail') currentDetailId = param;
     if (page === 'create') { currentCreateStep = 1; createData = {}; }
-    if (page === 'explore' && param) activeGameFilter = param;
-    if (page === 'explore' && !param && currentPage !== 'explore') activeGameFilter = null;
+    if (page === 'explore') {
+        if (typeof param === 'string' && param.startsWith('search:')) {
+            activeSearchQuery = param.replace('search:', '');
+            activeGameFilter = null;
+        } else if (param) {
+            activeGameFilter = param;
+            activeSearchQuery = '';
+        } else if (currentPage !== 'explore') {
+            activeGameFilter = null;
+            activeSearchQuery = '';
+        }
+    }
     renderApp();
     window.scrollTo({ top: 0, behavior: 'smooth' });
 }
+
 
 
 // ==================== RENDER ====================
@@ -109,11 +120,14 @@ function renderApp() {
         'explore': renderExplore,
         'profile': renderProfile,
         'messages': renderMessages,
+        'favorites': renderFavorites,
+        'settings': renderSettings,
     };
     container.innerHTML = (pages[currentPage] || renderHome)();
     attachListeners();
     updateBadges();
 }
+
 
 function updateBadges() {
     const unread = messages.filter(m => m.toUserId === currentUser.id && !m.read).length;
@@ -122,11 +136,12 @@ function updateBadges() {
 }
 
 function renderCard(a) {
-    const isLiked = a.likedBy.includes(currentUser.id);
+    const isLiked = (a.likedBy || []).includes(currentUser.id);
+    const imageStyle = a.imageUrl ? `background-image:url(${a.imageUrl}); background-size:cover;` : '';
     return `
     <div class="card" onclick="navigate('detail', ${a.id})">
-        <div class="card-image ${a.rarityClass}">
-            <span class="item-emoji">${a.imageEmoji}</span>
+        <div class="card-image ${a.rarityClass}" style="${imageStyle}">
+            ${!a.imageUrl ? `<span class="item-emoji">${a.imageEmoji}</span>` : ''}
             <span class="card-rarity rarity-${a.rarityClass}">${a.rarity}</span>
         </div>
         <div class="card-body">
@@ -135,8 +150,8 @@ function renderCard(a) {
             <div class="card-search">Cherche : ${a.searchFor}</div>
             <div class="card-footer">
                 <div class="card-stats">
-                    <span>${icons.eye} ${a.views}</span>
-                    <span>${icons.heart} ${a.likes}</span>
+                    <span>${icons.eye} ${a.views || 0}</span>
+                    <span>${icons.heart} ${a.likes || 0}</span>
                 </div>
                 <button class="card-like-btn ${isLiked ? 'liked' : ''}" onclick="event.stopPropagation();toggleLike(${a.id}, this)" title="J'aime">
                     ${isLiked ? icons.heartFilled : icons.heart}
@@ -147,9 +162,11 @@ function renderCard(a) {
 `;
 }
 
+
 function renderHome() {
-    const featured = announces.slice(0, 5);
-    const recent = announces.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
+    const featured = [...announces].sort((a, b) => (b.views + b.likes*5) - (a.views + a.likes*5)).slice(0, 5);
+    const recent = [...announces].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
+
     return `
     <div class="container">
         <section class="hero">
@@ -197,8 +214,12 @@ function renderDetail(id) {
     const a = announces.find(ann => ann.id === id);
     if (!a) return '<div class="container"><p style="color:var(--white-50);padding:60px 0;text-align:center;">Annonce introuvable.</p></div>';
     
-    // Increment views (local simulation)
+    // Increment views in Supabase
+    if (AuraAuth._supabase) {
+        AuraAuth._supabase.rpc('increment_views', { announce_id: a.id });
+    }
     a.views = (a.views || 0) + 1;
+
     
     const isLiked = (a.likedBy || []).includes(currentUser.id);
     const similar = announces.filter(ann => ann.id !== a.id && ann.gameId === a.gameId).slice(0, 4);
@@ -376,10 +397,15 @@ function renderCreateStep() {
         <div class="form-group"><label>Ce que tu recherches en échange *</label>
             <textarea id="createSearchFor" rows="3" placeholder="Décris ce que tu veux recevoir en échange...">${createData.searchFor||''}</textarea>
         </div>
+        <div class="form-group"><label>Lien d'une capture d'écran (optionnel)</label>
+            <input type="text" id="createImageUrl" placeholder="https://..." value="${createData.imageUrl||''}">
+            <p style="font-size:0.7rem;color:var(--white-30);margin-top:4px;">Colle le lien d'une image (Imgur, Discord, etc.) pour illustrer ton offre.</p>
+        </div>
         <div style="display:flex;gap:10px;">
             <button class="btn btn-secondary" onclick="prevStep()">${icons.arrowLeft} Retour</button>
             <button class="btn btn-primary" onclick="nextStep()">Continuer ${icons.arrowRight}</button>
         </div>
+
     `;
     } else {
         const gameName = createData.otherGame || games.find(g => g.id === createData.gameId)?.name || createData.gameId;
@@ -425,7 +451,9 @@ function nextStep() {
         const sf = document.getElementById('createSearchFor')?.value;
         if (!sf || !sf.trim()) return showToast('⚠️ Décris ce que tu recherches');
         createData.searchFor = sf.trim();
+        createData.imageUrl = document.getElementById('createImageUrl')?.value.trim();
     }
+
     if (currentCreateStep < 4) { currentCreateStep++; renderApp(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 }
 
@@ -445,6 +473,7 @@ async function publishAnnounce() {
         rarity: createData.rarity || 'Commun',
         rarityClass: rcMap[createData.rarity] || 'common',
         imageEmoji: emojiMap[createData.rarity] || '📦',
+        imageUrl: createData.imageUrl || null,
         description: createData.description || '',
         searchFor: createData.searchFor,
         sellerId: currentUser.id,
@@ -457,6 +486,7 @@ async function publishAnnounce() {
         likedBy: [],
         date: new Date().toISOString().split('T')[0],
     };
+
 
     if (AuraAuth._supabase) {
         try {
@@ -481,35 +511,125 @@ async function publishAnnounce() {
 function renderExplore() {
     let filtered = announces;
     if (activeGameFilter) filtered = filtered.filter(a => a.gameId === activeGameFilter);
-    const gameName = activeGameFilter ? games.find(g => g.id === activeGameFilter)?.name : 'Tous les jeux';
+    if (activeSearchQuery) {
+        const q = activeSearchQuery.toLowerCase();
+        filtered = filtered.filter(a => a.title.toLowerCase().includes(q) || a.gameName.toLowerCase().includes(q) || a.description.toLowerCase().includes(q));
+    }
+    const gameName = activeGameFilter ? games.find(g => g.id === activeGameFilter)?.name : (activeSearchQuery ? `Résultats pour "${activeSearchQuery}"` : 'Tous les jeux');
     return `
     <div class="container">
         <div style="display:flex;gap:24px;align-items:flex-start;">
-            <div style="width:220px;flex-shrink:0;">
-                <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-xl);padding:20px;position:sticky;top:80px;">
-                    <h3 style="font-weight:700;color:var(--white);margin-bottom:16px;font-size:0.95rem;">Filtres</h3>
-                    <div style="margin-bottom:16px;">
-                        <div style="font-weight:600;font-size:0.8rem;color:var(--white-70);margin-bottom:8px;">JEU</div>
-                        <div style="display:flex;flex-direction:column;gap:4px;">
-                            <span style="cursor:pointer;font-size:0.82rem;padding:6px 8px;border-radius:var(--radius-sm);transition:var(--transition);${!activeGameFilter?'background:var(--orange-light);color:var(--orange);font-weight:600;':'color:var(--white-50);'}" onclick="activeGameFilter=null;navigate('explore')">🌟 Tous les jeux</span>
-                            ${games.map(g => `
-                                <span style="cursor:pointer;font-size:0.82rem;padding:6px 8px;border-radius:var(--radius-sm);transition:var(--transition);${activeGameFilter===g.id?'background:var(--orange-light);color:var(--orange);font-weight:600;':'color:var(--white-50);'}" onclick="activeGameFilter='${g.id}';navigate('explore')">${g.icon} ${g.name}</span>
-                            `).join('')}
-                        </div>
+            <div class="explore-sidebar">
+                <div class="filter-card">
+                    <h3 class="filter-title">Catégories</h3>
+                    <div class="filter-list">
+                        <span class="filter-item ${!activeGameFilter && !activeSearchQuery ? 'active' : ''}" onclick="activeGameFilter=null;activeSearchQuery='';navigate('explore')">🌟 Tous les jeux</span>
+                        ${games.map(g => `
+                            <span class="filter-item ${activeGameFilter===g.id ? 'active' : ''}" onclick="navigate('explore', '${g.id}')">${g.icon} ${g.name}</span>
+                        `).join('')}
                     </div>
-                    <button class="btn btn-secondary btn-sm btn-block" onclick="activeGameFilter=null;navigate('explore')">Réinitialiser</button>
+                    <button class="btn btn-secondary btn-sm btn-block mt-4" onclick="activeGameFilter=null;activeSearchQuery='';navigate('explore')">Effacer</button>
                 </div>
             </div>
             <div style="flex:1;">
                 <h2 style="font-size:1.4rem;font-weight:800;color:var(--white);margin-bottom:6px;">🔍 ${gameName}</h2>
                 <p style="color:var(--white-50);margin-bottom:20px;">${filtered.length} annonce${filtered.length>1?'s':''} trouvée${filtered.length>1?'s':''}</p>
                 <div class="grid-3">${filtered.map(a => renderCard(a)).join('')}</div>
-                ${filtered.length===0 ? '<p style="text-align:center;color:var(--white-50);padding:60px 0;">Aucune annonce trouvée.</p>' : ''}
+                ${filtered.length===0 ? '<p class="empty-msg">Aucune annonce trouvée pour votre recherche.</p>' : ''}
             </div>
         </div>
     </div>
 `;
 }
+
+function renderFavorites() {
+    const favs = announces.filter(a => (a.likedBy || []).includes(currentUser.id));
+    return `
+    <div class="container">
+        <h2 style="font-size:1.6rem;font-weight:800;color:var(--white);margin-bottom:20px;">❤️ Mes favoris</h2>
+        ${favs.length > 0 ? `<div class="grid-3">${favs.map(a => renderCard(a)).join('')}</div>` : '<p class="empty-msg">Vous n\'avez pas encore d\'annonces en favoris.</p>'}
+    </div>
+`;
+}
+
+function renderSettings() {
+    return `
+    <div class="container" style="max-width:600px;">
+        <h2 style="font-size:1.6rem;font-weight:800;color:var(--white);margin-bottom:24px;">⚙️ Paramètres</h2>
+        
+        <div class="sidebar-card">
+            <h3 class="section-title">Profil</h3>
+            <div class="form-group">
+                <label>Nom d'utilisateur (Pseudo)</label>
+                <input type="text" id="settingsPseudo" value="${currentUser.pseudo}" placeholder="Ton pseudo Roblox...">
+            </div>
+            <button class="btn btn-primary" onclick="updateProfile()">Enregistrer les modifications</button>
+        </div>
+
+        <div class="sidebar-card mt-4">
+            <h3 class="section-title">Sécurité & Compte</h3>
+            <p style="color:var(--white-50);font-size:0.9rem;margin-bottom:16px;">
+                Connecté avec : <strong style="color:var(--white);">${currentUser.email || 'Google Account'}</strong>
+            </p>
+            <div style="display:flex;flex-direction:column;gap:10px;">
+                <button class="btn btn-secondary btn-block" onclick="AuraAuth.logOut()">
+                    Se déconnecter
+                </button>
+                <button class="btn btn-ghost btn-block" style="color:var(--danger);border:1px solid rgba(255, 69, 58, 0.2);" onclick="confirmDeleteAccount()">
+                    Supprimer mon compte Aura Trade
+                </button>
+            </div>
+        </div>
+
+        <div class="sidebar-card mt-4" style="background:rgba(255, 255, 255, 0.02);border-style:dashed;">
+            <h3 class="section-title" style="font-size:0.9rem;">Besoin d'aide ?</h3>
+            <p style="font-size:0.8rem;color:var(--white-30);">Si vous rencontrez un problème technique ou souhaitez signaler un bug, contactez le support Aura Trade.</p>
+        </div>
+    </div>
+`;
+}
+
+async function confirmDeleteAccount() {
+    if (confirm("⚠️ Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et supprimera votre profil ainsi que toutes vos annonces.")) {
+        if (AuraAuth._supabase) {
+            try {
+                // Delete profile from DB (announces will cascade if foreign key is set to cascade)
+                const { error } = await AuraAuth._supabase.from('profiles').delete().eq('id', currentUser.id);
+                if (error) throw error;
+                
+                showToast('👋 Compte supprimé avec succès.');
+                AuraAuth.logOut();
+            } catch (e) {
+                console.error(e);
+                showToast('❌ Erreur lors de la suppression.');
+            }
+        } else {
+            AuraAuth.logOut();
+        }
+    }
+}
+
+
+async function updateProfile() {
+    const newPseudo = document.getElementById('settingsPseudo')?.value.trim();
+    if (!newPseudo) return showToast('⚠️ Le pseudo ne peut pas être vide');
+    
+    currentUser.pseudo = newPseudo;
+    if (AuraAuth._supabase) {
+        try {
+            const { error } = await AuraAuth._supabase.from('profiles').update({ pseudo: newPseudo }).eq('id', currentUser.id);
+            if (error) throw error;
+            showToast('✅ Profil mis à jour !');
+            refreshUserData();
+            renderApp();
+        } catch (e) { console.error(e); showToast('❌ Erreur lors de la mise à jour'); }
+    } else {
+        showToast('✅ Profil mis à jour !');
+        refreshUserData();
+        renderApp();
+    }
+}
+
 
 function renderProfile() {
     const myAnnounces = announces.filter(a => a.sellerId === currentUser.id);
@@ -524,8 +644,9 @@ function renderProfile() {
                 <div class="profile-stat"><div class="val">${currentUser.trades || 0}</div><div class="lbl">Échanges</div></div>
                 <div class="profile-stat"><div class="val">⭐ ${currentUser.rating || 5.0}</div><div class="lbl">Note</div></div>
             </div>
-            <button class="btn btn-secondary mt-4" onclick="AuraAuth.logOut()">Se déconnecter</button>
+            <button class="btn btn-secondary mt-4" onclick="navigate('settings')">⚙️ Paramètres</button>
         </div>
+
 
         <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);">
             <button class="btn btn-ghost" style="border-bottom:2px solid var(--orange);border-radius:0;color:var(--white);">Mes annonces</button>
@@ -725,19 +846,66 @@ function closeModal() {
 }
 
 // ==================== ACTIONS ====================
-function toggleLike(announceId, btnEl) {
+async function toggleLike(announceId, btnEl) {
     if (!AuraAuth.getUser()) {
         window.location.href = 'login.html';
         return;
     }
     const a = announces.find(ann => ann.id === announceId);
-
     if (!a) return;
-    const idx = a.likedBy.indexOf(currentUser.id);
-    if (idx > -1) { a.likedBy.splice(idx, 1); a.likes = Math.max(0, a.likes - 1); } else { a.likedBy.push(currentUser.id); a.likes++; }
+
+    const idx = (a.likedBy || []).indexOf(currentUser.id);
+    if (idx > -1) { 
+        a.likedBy.splice(idx, 1); 
+        a.likes = Math.max(0, a.likes - 1); 
+    } else { 
+        if (!a.likedBy) a.likedBy = [];
+        a.likedBy.push(currentUser.id); 
+        a.likes++; 
+    }
+
+    if (AuraAuth._supabase) {
+        AuraAuth._supabase.from('announces').update({ likes: a.likes, likedBy: a.likedBy }).eq('id', a.id).then();
+    }
+
     if (btnEl) { btnEl.classList.add('just-liked'); setTimeout(() => btnEl.classList.remove('just-liked'), 400); }
     renderApp();
 }
+
+function openPseudoSetupModal() {
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'activeModal';
+    overlay.innerHTML = `
+    <div class="modal">
+        <h3>✨ Bienvenue sur Aura Trade !</h3>
+        <p class="subtitle">Pour commencer, choisis ton pseudo de trader Roblox.</p>
+        <div class="form-group">
+            <label>Ton Pseudo</label>
+            <input type="text" id="setupPseudo" placeholder="Ex: MasterTrader_99">
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-primary btn-block" onclick="saveInitialPseudo()">Commencer l'aventure</button>
+        </div>
+    </div>`;
+    document.body.appendChild(overlay);
+}
+
+async function saveInitialPseudo() {
+    const p = document.getElementById('setupPseudo')?.value.trim();
+    if (!p) return showToast('⚠️ Entre un pseudo !');
+    
+    currentUser.pseudo = p;
+    if (AuraAuth._supabase) {
+        await AuraAuth._supabase.from('profiles').update({ pseudo: p }).eq('id', currentUser.id);
+    }
+    closeModal();
+    showToast('🚀 C\'est parti, ' + p + ' !');
+    refreshUserData();
+    renderApp();
+}
+
+
 
 function shareAnnounce(id) {
     const url = window.location.origin + window.location.pathname + '?page=detail&id=' + id;
@@ -761,11 +929,12 @@ function showToast(msg) {
 // ==================== LISTENERS ====================
 function attachListeners() {
     document.getElementById('heroSearchInput')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') { activeGameFilter = null; navigate('explore'); }
+        if (e.key === 'Enter') { navigate('explore', 'search:' + this.value); }
     });
     document.getElementById('headerSearchInput')?.addEventListener('keypress', function(e) {
-        if (e.key === 'Enter') { activeGameFilter = null; navigate('explore'); }
+        if (e.key === 'Enter') { navigate('explore', 'search:' + this.value); }
     });
+
     const cg = document.getElementById('createGame');
     if (cg) {
         cg.addEventListener('change', function() {
@@ -806,7 +975,13 @@ async function init() {
     await fetchAnnounces();
     await fetchMessages();
     
+    // Check if user needs to set a pseudo
+    if (currentUser.id !== 'guest' && (!currentUser.pseudo || currentUser.pseudo.startsWith('User_'))) {
+        openPseudoSetupModal();
+    }
+    
     const params = new URLSearchParams(window.location.search);
+
 
 
     const page = params.get('page');
