@@ -43,7 +43,9 @@ async function saveSession(payload) {
         avatar:  payload.name.charAt(0),
         exp:     payload.exp,
         rating:  existingProfile?.rating || 5.0,
-        trades:  existingProfile?.trades || 0
+        trades:  existingProfile?.trades || 0,
+        is_premium: existingProfile?.is_premium || false,
+        premium_style: existingProfile?.premium_style || 'anim-gold'
     };
     
     localStorage.setItem(SESSION_KEY, JSON.stringify(user));

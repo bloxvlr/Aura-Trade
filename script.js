@@ -45,6 +45,15 @@ function refreshUserData() {
         if (userActions) userActions.style.display = 'flex';
         if (loginBtn) loginBtn.style.display = 'none';
         
+        if (AuraAuth._supabase && currentUser.id !== 'guest') {
+            AuraAuth._supabase.from('profiles').upsert({
+                id: currentUser.id,
+                email: currentUser.email,
+                pseudo: currentUser.pseudo,
+                last_seen: new Date().toISOString()
+            }, { onConflict: 'id' }).then();
+        }
+
         const avatarEl = document.getElementById('headerAvatar');
         if (avatarEl) {
             avatarEl.textContent = currentUser.avatar;
@@ -176,7 +185,10 @@ function renderCard(a) {
             <div class="card-game">${a.gameName}</div>
             <div class="card-title">${a.title}</div>
             <div class="card-search">Cherche : ${a.searchFor}</div>
-            <div style="font-size:0.8rem;color:var(--white-50);margin-top:8px;">Par <span class="${pseudoClass}">${a.sellerName}</span>${badge}</div>
+            <div style="font-size:0.8rem;color:var(--white-50);margin-top:8px;display:flex;align-items:center;gap:6px;">
+                <div class="avatar-sm" style="width:20px;height:20px;font-size:0.7rem;${a.sellerPicture ? `background-image:url(${a.sellerPicture});background-size:cover;color:transparent;` : ''}">${a.sellerPicture ? '' : (a.sellerAvatar || '?')}</div>
+                <span>Par <span class="${pseudoClass}">${a.sellerName}</span>${badge}</span>
+            </div>
             <div class="card-footer">
                 <div class="card-stats">
                     <span>${icons.eye} ${a.views || 0}</span>
@@ -550,6 +562,7 @@ async function publishAnnounce() {
         sellerId: currentUser.id,
         sellerName: currentUser.pseudo,
         sellerAvatar: currentUser.avatar,
+        sellerPicture: currentUser.picture || null,
         sellerRating: currentUser.rating,
         sellerTrades: currentUser.trades || 0,
         sellerPremium: currentUser.is_premium || false,
