@@ -36,8 +36,9 @@ async function saveSession(payload) {
     const user = {
         id:      payload.sub,
         name:    payload.name,
-        pseudo:  existingProfile?.pseudo || payload.name.split(' ')[0] + Math.floor(Math.random() * 1000),
+        pseudo:  existingProfile?.pseudo || null,
         email:   payload.email,
+
         picture: payload.picture,
         avatar:  payload.name.charAt(0),
         exp:     payload.exp,
