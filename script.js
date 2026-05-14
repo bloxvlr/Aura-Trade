@@ -431,17 +431,17 @@ function renderCreateStep() {
         <div class="form-group"><label>Ce que tu recherches en échange *</label>
             <textarea id="createSearchFor" rows="3" placeholder="Décris ce que tu veux recevoir en échange...">${createData.searchFor||''}</textarea>
         </div>
-        <div class="form-group"><label>Lien d'une capture d'écran (optionnel)</label>
-            <input type="text" id="createImageUrl" placeholder="https://..." value="${createData.imageUrl||''}">
-            <p style="font-size:0.7rem;color:var(--white-30);margin-top:4px;">Colle le lien d'une image (Imgur, Discord, etc.) pour illustrer ton offre.</p>
+        <div class="form-group"><label>Uploader une image (Max 8 MB)</label>
+            <input type="file" id="createImageFile" accept="image/*" style="padding:10px;background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-md);width:100%;color:var(--white);">
+            <p style="font-size:0.7rem;color:var(--white-30);margin-top:4px;">Sélectionne une capture d'écran de ton item.</p>
         </div>
         <div style="display:flex;gap:10px;">
             <button class="btn btn-secondary" onclick="prevStep()">${icons.arrowLeft} Retour</button>
-            <button class="btn btn-primary" onclick="nextStep()">Continuer ${icons.arrowRight}</button>
+            <button class="btn btn-primary" onclick="nextStepImage()">Continuer ${icons.arrowRight}</button>
         </div>
-
     `;
     } else {
+
         const gameName = createData.otherGame || games.find(g => g.id === createData.gameId)?.name || createData.gameId;
         const rcMap = { 'Commun': 'common', 'Rare': 'rare', 'Ultra-Rare': 'ultra-rare', 'Légendaire': 'legendary', 'Mythique': 'legendary' };
         const rc = rcMap[createData.rarity] || 'common';
@@ -485,11 +485,47 @@ function nextStep() {
         const sf = document.getElementById('createSearchFor')?.value;
         if (!sf || !sf.trim()) return showToast('⚠️ Décris ce que tu recherches');
         createData.searchFor = sf.trim();
-        createData.imageUrl = document.getElementById('createImageUrl')?.value.trim();
+        // Image logic is handled in nextStepImage()
     }
 
     if (currentCreateStep < 4) { currentCreateStep++; renderApp(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 }
+
+async function nextStepImage() {
+    const fileInput = document.getElementById('createImageFile');
+    const sf = document.getElementById('createSearchFor')?.value;
+    if (!sf || !sf.trim()) return showToast('⚠️ Décris ce que tu recherches');
+    createData.searchFor = sf.trim();
+
+    if (fileInput && fileInput.files[0]) {
+        const file = fileInput.files[0];
+        if (file.size > 8 * 1024 * 1024) return showToast('⚠️ L\\'image ne doit pas dépasser 8 MB');
+        
+        // Compress image using canvas
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = new Image();
+            img.onload = function() {
+                const canvas = document.createElement('canvas');
+                const MAX_WIDTH = 800; const MAX_HEIGHT = 800;
+                let width = img.width; let height = img.height;
+                if (width > height && width > MAX_WIDTH) { height *= MAX_WIDTH / width; width = MAX_WIDTH; }
+                else if (height > MAX_HEIGHT) { width *= MAX_HEIGHT / height; height = MAX_HEIGHT; }
+                canvas.width = width; canvas.height = height;
+                const ctx = canvas.getContext('2d');
+                ctx.drawImage(img, 0, 0, width, height);
+                createData.imageUrl = canvas.toDataURL('image/jpeg', 0.8);
+                if (currentCreateStep < 4) { currentCreateStep++; renderApp(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+            }
+            img.src = e.target.result;
+        }
+        reader.readAsDataURL(file);
+    } else {
+        createData.imageUrl = null;
+        if (currentCreateStep < 4) { currentCreateStep++; renderApp(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+    }
+}
+
 
 function prevStep() {
     if (currentCreateStep > 1) { currentCreateStep--; renderApp(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
@@ -522,7 +558,8 @@ async function publishAnnounce() {
         likes: 0,
 
         likedBy: [],
-        date: new Date().toISOString().split('T')[0],
+        editCount: 0,
+        date: new Date().toISOString(),
     };
 
 
@@ -1013,9 +1050,10 @@ function renderProfile() {
             <button class="btn btn-ghost" style="border-bottom:2px solid var(--orange);border-radius:0;color:var(--white);">Mes annonces</button>
             <button class="btn btn-ghost" style="border-radius:0;" onclick="document.getElementById('tradeHistorySection').scrollIntoView({behavior:'smooth'})">Historique d'échanges</button>
         </div>
-        <div class="grid-3">${myAnnounces.map(a => renderCard(a)).join('')}</div>
+        <div class="grid-3">${myAnnounces.map(a => renderMyAnnounceCard(a)).join('')}</div>
         ${myAnnounces.length===0 ? '<p style="text-align:center;color:var(--white-50);padding:40px 0;">Aucune annonce publiée.</p>' : ''}
         <div id="tradeHistorySection" style="margin-top:40px;">
+
             <div class="section-header"><h2>${icons.barChart} Historique d'échanges</h2></div>
             ${currentUser.tradeHistory.map(t => `
                 <div class="trade-history-item">
@@ -1036,7 +1074,61 @@ function renderProfile() {
 `;
 }
 
+function renderMyAnnounceCard(a) {
+    const imageStyle = a.imageUrl ? `background-image:url(${a.imageUrl}); background-size:cover;` : '';
+    const premiumClass = a.sellerPremium ? 'premium-card' : '';
+    
+    return `
+    <div class="card ${premiumClass}">
+        <div class="card-image ${a.rarityClass}" style="${imageStyle}">
+            ${!a.imageUrl ? `<span class="item-emoji">${a.imageEmoji}</span>` : ''}
+            <span class="card-rarity rarity-${a.rarityClass}">${a.rarity}</span>
+        </div>
+        <div class="card-body">
+            <div class="card-game">${a.gameName}</div>
+            <div class="card-title">${a.title}</div>
+            <div style="font-size:0.8rem;color:var(--white-50);margin-top:8px;">Modifications : ${a.editCount || 0}/2</div>
+            <div class="card-footer" style="margin-top:16px;">
+                <button class="btn btn-secondary btn-sm" style="flex:1;" onclick="editMyAnnounce(${a.id})">✏️ Modifier</button>
+                <button class="btn btn-ghost btn-sm" style="flex:1;color:var(--danger);" onclick="deleteMyAnnounce(${a.id})">🗑️ Supprimer</button>
+            </div>
+        </div>
+    </div>
+    `;
+}
+
+async function editMyAnnounce(id) {
+    const a = announces.find(ann => ann.id === id);
+    if (!a) return;
+    if ((a.editCount || 0) >= 2) return showToast('⚠️ Limite de modifications atteinte (2/2)');
+    
+    const newDesc = prompt('Nouvelle description :', a.description);
+    if (newDesc === null) return; // cancelled
+    
+    const newCount = (a.editCount || 0) + 1;
+    
+    a.description = newDesc;
+    a.editCount = newCount;
+    
+    if (AuraAuth._supabase) {
+        await AuraAuth._supabase.from('announces').update({ description: newDesc, editCount: newCount }).eq('id', id);
+    }
+    showToast('✏️ Annonce modifiée (' + newCount + '/2)');
+    renderApp();
+}
+
+async function deleteMyAnnounce(id) {
+    if (!confirm('Voulez-vous vraiment supprimer cette annonce ?')) return;
+    announces = announces.filter(a => a.id !== id);
+    if (AuraAuth._supabase) {
+        await AuraAuth._supabase.from('announces').delete().eq('id', id);
+    }
+    showToast('🗑️ Annonce supprimée');
+    renderApp();
+}
+
 function renderMessages() {
+
     messages.forEach(m => { if (m.toUserId === currentUser.id) m.read = true; });
     const conversations = {};
     messages.forEach(m => {
@@ -1320,10 +1412,30 @@ async function fetchAnnounces() {
     try {
         const { data, error } = await AuraAuth._supabase.from('announces').select('*').order('date', { ascending: false });
         if (error) throw error;
-        announces = data || [];
+        
+        const now = new Date().getTime();
+        const validAnnounces = [];
+        
+        for (const a of (data || [])) {
+            // Auto-delete logic
+            const dateObj = new Date(a.date);
+            // If date is invalid or old format without hours, assume midnight of that day
+            const ageHours = (now - dateObj.getTime()) / (1000 * 60 * 60);
+            const maxHours = a.sellerPremium ? (5 * 24) : 48;
+            
+            if (ageHours > maxHours) {
+                // Delete from DB
+                await AuraAuth._supabase.from('announces').delete().eq('id', a.id);
+            } else {
+                validAnnounces.push(a);
+            }
+        }
+        
+        announces = validAnnounces;
         renderApp();
     } catch (e) { console.error('Fetch failed:', e); }
 }
+
 
 async function fetchMessages() {
     if (!AuraAuth._supabase || !currentUser.id) return;
