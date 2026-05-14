@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aura Trade — Connexion</title>
+    
+    <!-- Google Identity Services -->
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="auth.js"></script>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700;900&display=swap" rel="stylesheet">
+    
+    <style>
+        :root {
+            --bg: #0A0A0B;
+            --card-bg: rgba(18, 18, 20, 0.7);
+            --orange: #FF6B2B;
+            --orange-hover: #FF8150;
+            --white: #FFFFFF;
+            --text-muted: rgba(255, 255, 255, 0.5);
+            --border: rgba(255, 255, 255, 0.08);
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background-color: var(--bg);
+            background-image: 
+                radial-gradient(circle at 20% 30%, rgba(255, 107, 43, 0.1), transparent 40%),
+                radial-gradient(circle at 80% 70%, rgba(255, 107, 43, 0.05), transparent 40%);
+            color: var(--white);
+            font-family: 'Inter', sans-serif;
+            height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .login-container {
+            width: 100%;
+            max-width: 420px;
+            padding: 20px;
+            z-index: 10;
+        }
+
+        .login-card {
+            background: var(--card-bg);
+            backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid var(--border);
+            border-radius: 28px;
+            padding: 48px 40px;
+            text-align: center;
+            box-shadow: 0 24px 60px rgba(0, 0, 0, 0.5);
+        }
+
+        .logo-wrap {
+            margin-bottom: 32px;
+            display: flex;
+            justify-content: center;
+        }
+
+        .logo-wrap svg {
+            width: 64px;
+            height: 64px;
+        }
+
+        h1 {
+            font-size: 2rem;
+            font-weight: 900;
+            letter-spacing: -0.03em;
+            margin-bottom: 12px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 0.95rem;
+            line-height: 1.5;
+            margin-bottom: 40px;
+        }
+
+        #google-btn-container {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .footer-text {
+            font-size: 0.75rem;
+            color: rgba(255, 255, 255, 0.3);
+            margin-top: 32px;
+            line-height: 1.6;
+        }
+
+        .footer-text a {
+            color: var(--orange);
+            text-decoration: none;
+        }
+
+        /* Decorative Background Elements */
+        .glow {
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: var(--orange);
+            filter: blur(150px);
+            opacity: 0.1;
+            border-radius: 50%;
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .glow-1 { top: -100px; left: -100px; }
+        .glow-2 { bottom: -100px; right: -100px; }
+
+        .loading-overlay {
+            position: fixed;
+            inset: 0;
+            background: var(--bg);
+            display: none;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid rgba(255, 107, 43, 0.1);
+            border-top-color: var(--orange);
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-bottom: 16px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="glow glow-1"></div>
+    <div class="glow glow-2"></div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-wrap">
+                <svg viewBox="0 0 34 34" fill="none">
+                    <rect width="34" height="34" rx="10" fill="url(#logoGrad)"/>
+                    <defs><linearGradient id="logoGrad" x1="0" y1="0" x2="34" y2="34"><stop stop-color="#FF6B2B"/><stop offset="1" stop-color="#FF9A5C"/></linearGradient></defs>
+                    <path d="M17 8L22 13L20 19H14L12 13L17 8Z" fill="white" opacity="0.9"/>
+                    <circle cx="17" cy="22" r="3" fill="white" opacity="0.9"/>
+                </svg>
+            </div>
+            <h1>Aura Trade</h1>
+            <p class="subtitle">La plateforme de trading nouvelle génération pour Roblox. Connectez-vous pour commencer à échanger.</p>
+            
+            <div id="google-btn-container"></div>
+            
+            <p class="footer-text">
+                En continuant, vous acceptez nos <a href="#">Conditions d'utilisation</a> et notre <a href="#">Politique de confidentialité</a>.
+            </p>
+        </div>
+    </div>
+
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="spinner"></div>
+        <p>Connexion à Aura Trade...</p>
+    </div>
+
+    <script>
+        window.addEventListener('load', () => {
+            const params = new URLSearchParams(window.location.search);
+            const isLogout = params.get('logout') === 'true';
+
+            if (!isLogout) {
+                AuraAuth.redirectIfLoggedIn('index.html');
+            }
+
+            const tryInit = () => {
+                if (typeof google !== 'undefined' && google.accounts) {
+                    AuraAuth.initGoogleAuth({
+                        onSuccess: () => {
+                            document.getElementById('loadingOverlay').classList.add('active');
+                            setTimeout(() => { window.location.href = 'index.html'; }, 1000);
+                        },
+                        onError: (err) => {
+                            alert('Erreur de connexion : ' + err);
+                        }
+                    });
+                    AuraAuth.renderGoogleButton('google-btn-container', 'filled_black');
+                } else {
+                    setTimeout(tryInit, 200);
+                }
+            };
+            tryInit();
+        });
+    </script>
+</body>
+</html>

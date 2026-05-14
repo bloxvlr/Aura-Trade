@@ -1,0 +1,689 @@
+// ==================== SVG ICONS (inline reuse) ====================
+const icons = {
+    search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>',
+    eye: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/></svg>',
+    heart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
+    heartFilled: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z"/></svg>',
+    star: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="none"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"/></svg>',
+    arrowRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="5" y1="12" x2="19" y2="12"/><polyline points="12 5 19 12 12 19"/></svg>',
+    arrowLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>',
+    chevronRight: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="9 18 15 12 9 6"/></svg>',
+    chevronLeft: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><polyline points="15 18 9 12 15 6"/></svg>',
+    send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',
+    messageCircle: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>',
+    plus: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
+    share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><line x1="8.59" y1="13.51" x2="15.42" y2="17.49"/><line x1="15.41" y1="6.51" x2="8.59" y2="10.49"/></svg>',
+    clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+    user: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>',
+    barChart: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>',
+    shield: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>',
+    trending: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="23 6 13.5 15.5 8.5 10.5 1 18"/><polyline points="17 6 23 6 23 12"/></svg>',
+};
+
+// ==================== AUTH & USER ====================
+let currentUser = AuraAuth.getUser() || {
+    id: 'guest',
+    name: 'Invité',
+    pseudo: 'Guest',
+    avatar: '?',
+    memberSince: '2026',
+    rating: 5.0,
+    totalAnnounces: 0,
+    totalTrades: 0,
+    tradeHistory: [],
+};
+
+function refreshUserData() {
+    const user = AuraAuth.getUser();
+    const userActions = document.getElementById('userActions');
+    const loginBtn = document.getElementById('loginBtn');
+    
+    if (user) {
+        currentUser = user;
+        if (userActions) userActions.style.display = 'flex';
+        if (loginBtn) loginBtn.style.display = 'none';
+        
+        const avatarEl = document.getElementById('headerAvatar');
+        if (avatarEl) {
+            avatarEl.textContent = currentUser.avatar;
+            if (currentUser.picture) {
+                avatarEl.style.backgroundImage = `url(${currentUser.picture})`;
+                avatarEl.style.backgroundSize = 'cover';
+                avatarEl.textContent = '';
+            }
+        }
+    } else {
+        if (userActions) userActions.style.display = 'none';
+        if (loginBtn) loginBtn.style.display = 'block';
+    }
+}
+
+
+
+const games = [
+    { id: 'schoolfr', name: 'School Fr RP', icon: '🏫' },
+    { id: 'adoptme', name: 'Adopt Me !', icon: '🐾' },
+    { id: 'mm2', name: 'Murder Mystery 2', icon: '🔪' },
+    { id: 'petsim', name: 'Pet Simulator X', icon: '💎' },
+    { id: 'bloxfruits', name: 'Blox Fruits', icon: '🍎' },
+    { id: 'brookhaven', name: 'Brookhaven RP', icon: '🏘️' },
+];
+
+let announces = [
+    { id: 1, gameId: 'schoolfr', gameName: 'School Fr RP', title: 'Aura Légendaire du Dragon Ancestral', rarity: 'Légendaire', rarityClass: 'legendary', imageEmoji: '🐉', description: 'Aura légendaire extrêmement rare obtenue lors de l\'événement Dragon Ancestral. Effet de flammes bleues autour du personnage. Très recherchée.', searchFor: 'Une autre aura légendaire ou une tenue complète de directeur', sellerId: 'user2', sellerName: 'EmmaDubois', sellerAvatar: 'E', sellerRating: 4.9, sellerTrades: 15, views: 1247, likes: 89, likedBy: [], date: '2026-05-10' },
+    { id: 2, gameId: 'schoolfr', gameName: 'School Fr RP', title: 'Pass VIP Permanent', rarity: 'Ultra-Rare', rarityClass: 'ultra-rare', imageEmoji: '👑', description: 'Pass VIP permanent pour School Fr RP. Accès à toutes les zones VIP, salaires x2.', searchFor: 'Aura de Fondateur + un véhicule rare', sellerId: 'user3', sellerName: 'TheoGamer', sellerAvatar: 'T', sellerRating: 4.6, sellerTrades: 7, views: 892, likes: 45, likedBy: [], date: '2026-05-12' },
+    { id: 3, gameId: 'adoptme', gameName: 'Adopt Me !', title: 'Girafe Néon Volante', rarity: 'Légendaire', rarityClass: 'legendary', imageEmoji: '🦒', description: 'Girafe néon volante et chevauchable. Full grown. Plus disponible dans les œufs.', searchFor: 'Chien de l\'ombre néon ou plusieurs légendaires', sellerId: 'user4', sellerName: 'SarahPets', sellerAvatar: 'S', sellerRating: 5.0, sellerTrades: 23, views: 2301, likes: 156, likedBy: [], date: '2026-05-08' },
+    { id: 4, gameId: 'mm2', gameName: 'Murder Mystery 2', title: 'Chroma Darkbringer', rarity: 'Légendaire', rarityClass: 'legendary', imageEmoji: '🗡️', description: 'Couteau Chroma Darkbringer. Change de couleur. Un des chromas les plus recherchés.', searchFor: 'Chroma Lightbringer ou Godly rare', sellerId: 'user5', sellerName: 'KnifeKing', sellerAvatar: 'K', sellerRating: 4.7, sellerTrades: 31, views: 1560, likes: 102, likedBy: [], date: '2026-05-13' },
+    { id: 5, gameId: 'schoolfr', gameName: 'School Fr RP', title: 'Scooter de Direction Bleu', rarity: 'Rare', rarityClass: 'rare', imageEmoji: '🛴', description: 'Scooter de direction bleu. Plus rapide que les scooters normaux.', searchFor: 'Tenue de professeur ou accessoire rare', sellerId: 'user2', sellerName: 'EmmaDubois', sellerAvatar: 'E', sellerRating: 4.9, sellerTrades: 15, views: 445, likes: 23, likedBy: [], date: '2026-05-14' },
+    { id: 6, gameId: 'petsim', gameName: 'Pet Simulator X', title: 'Huge Cat Doré', rarity: 'Légendaire', rarityClass: 'legendary', imageEmoji: '🐱', description: 'Huge Cat version dorée. Stats de dégâts énormes. Extrêmement rare.', searchFor: 'Autre Huge ou Titan', sellerId: 'user3', sellerName: 'TheoGamer', sellerAvatar: 'T', sellerRating: 4.6, sellerTrades: 7, views: 980, likes: 67, likedBy: [], date: '2026-05-11' },
+    { id: 7, gameId: 'bloxfruits', gameName: 'Blox Fruits', title: 'Dragon Fruit Éveillé', rarity: 'Légendaire', rarityClass: 'legendary', imageEmoji: '🍎', description: 'Fruit du Dragon éveillé. Transformation en dragon. Ultra puissant.', searchFor: 'Fruit Léopard éveillé ou offre équivalente', sellerId: 'user4', sellerName: 'SarahPets', sellerAvatar: 'S', sellerRating: 5.0, sellerTrades: 23, views: 1850, likes: 134, likedBy: [], date: '2026-05-09' },
+    { id: 8, gameId: 'schoolfr', gameName: 'School Fr RP', title: 'Maison de Luxe avec Piscine', rarity: 'Ultra-Rare', rarityClass: 'ultra-rare', imageEmoji: '🏠', description: 'Grande maison de luxe avec piscine, garage 3 places, jardin. Entièrement meublée.', searchFor: '2 auras légendaires ou offre équivalente', sellerId: 'user5', sellerName: 'KnifeKing', sellerAvatar: 'K', sellerRating: 4.7, sellerTrades: 31, views: 670, likes: 34, likedBy: [], date: '2026-05-14' },
+    { id: 9, gameId: 'adoptme', gameName: 'Adopt Me !', title: 'Œuf de Noël 2019 (Non Ouvert)', rarity: 'Ultra-Rare', rarityClass: 'ultra-rare', imageEmoji: '🥚', description: 'Œuf de Noël 2019 non ouvert. Contient des légendaires exclusifs. Pièce de collection.', searchFor: 'Plusieurs légendaires ou offre collectionneur', sellerId: 'user2', sellerName: 'EmmaDubois', sellerAvatar: 'E', sellerRating: 4.9, sellerTrades: 15, views: 2100, likes: 178, likedBy: [], date: '2026-05-07' },
+];
+
+let messages = [
+    { id: 1, announceId: 1, fromUserId: 'user1', toUserId: 'user2', content: 'Salut ! Ton Aura Légendaire m\'intéresse. Je peux proposer mon Aura de Phénix Millénaire.', date: '2026-05-14T10:30:00', read: true },
+    { id: 2, announceId: 1, fromUserId: 'user2', toUserId: 'user1', content: 'Coucou ! L\'Aura de Phénix ça me tente bien. Tu peux me montrer en jeu ?', date: '2026-05-14T10:45:00', read: false },
+    { id: 3, announceId: 3, fromUserId: 'user3', toUserId: 'user1', content: 'Hello, intéressé par ton Pass VIP. J\'ai une Aura de Fondateur à échanger.', date: '2026-05-14T09:00:00', read: false },
+];
+
+let nextId = 10;
+let currentPage = 'home';
+let currentDetailId = null;
+let currentCreateStep = 1;
+let createData = {};
+let activeGameFilter = null;
+
+// ==================== NAVIGATION ====================
+function navigate(page, param) {
+    // Pages requiring authentication
+    const authRequired = ['detail', 'create', 'messages', 'profile'];
+    if (authRequired.includes(page) && !AuraAuth.getUser()) {
+        window.location.href = 'login.html';
+        return;
+    }
+
+    currentPage = page;
+    if (page === 'detail') currentDetailId = param;
+    if (page === 'create') { currentCreateStep = 1; createData = {}; }
+    if (page === 'explore' && param) activeGameFilter = param;
+    if (page === 'explore' && !param && currentPage !== 'explore') activeGameFilter = null;
+    renderApp();
+    window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+
+// ==================== RENDER ====================
+function renderApp() {
+    const container = document.getElementById('appContent');
+    const pages = {
+        'home': renderHome,
+        'detail': () => renderDetail(currentDetailId),
+        'create': renderCreate,
+        'explore': renderExplore,
+        'profile': renderProfile,
+        'messages': renderMessages,
+    };
+    container.innerHTML = (pages[currentPage] || renderHome)();
+    attachListeners();
+    updateBadges();
+}
+
+function updateBadges() {
+    const unread = messages.filter(m => m.toUserId === currentUser.id && !m.read).length;
+    const badge = document.getElementById('msgBadge');
+    if (badge) badge.style.display = unread > 0 ? 'block' : 'none';
+}
+
+function renderCard(a) {
+    const isLiked = a.likedBy.includes(currentUser.id);
+    return `
+    <div class="card" onclick="navigate('detail', ${a.id})">
+        <div class="card-image ${a.rarityClass}">
+            <span class="item-emoji">${a.imageEmoji}</span>
+            <span class="card-rarity rarity-${a.rarityClass}">${a.rarity}</span>
+        </div>
+        <div class="card-body">
+            <div class="card-game">${a.gameName}</div>
+            <div class="card-title">${a.title}</div>
+            <div class="card-search">Cherche : ${a.searchFor}</div>
+            <div class="card-footer">
+                <div class="card-stats">
+                    <span>${icons.eye} ${a.views}</span>
+                    <span>${icons.heart} ${a.likes}</span>
+                </div>
+                <button class="card-like-btn ${isLiked ? 'liked' : ''}" onclick="event.stopPropagation();toggleLike(${a.id}, this)" title="J'aime">
+                    ${isLiked ? icons.heartFilled : icons.heart}
+                </button>
+            </div>
+        </div>
+    </div>
+`;
+}
+
+function renderHome() {
+    const featured = announces.slice(0, 5);
+    const recent = announces.slice().sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
+    return `
+    <div class="container">
+        <section class="hero">
+            <div class="hero-badge">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+                Plus de 200 échanges réalisés ce mois
+            </div>
+            <h1>Le <span class="highlight">bon coin</span> des items Roblox</h1>
+            <p>Échangez vos items en toute simplicité. Gratuit, sécurisé, sans argent.</p>
+            <div class="hero-search-wrap">
+                ${icons.search}
+                <input type="text" placeholder="Cherchez un item, un jeu..." id="heroSearchInput">
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-header">
+                <h2>${icons.trending} Offres à la une</h2>
+                <span class="section-link" onclick="navigate('explore')">Tout voir ${icons.chevronRight}</span>
+            </div>
+            <div class="carousel-wrap">
+                <button class="carousel-btn prev" onclick="scrollCarousel('featured', -1)">${icons.chevronLeft}</button>
+                <div class="carousel" id="carouselFeatured">${featured.map(a => renderCard(a)).join('')}</div>
+                <button class="carousel-btn next" onclick="scrollCarousel('featured', 1)">${icons.chevronRight}</button>
+            </div>
+        </section>
+
+        <section class="section">
+            <div class="section-header">
+                <h2>${icons.clock} Dernières offres</h2>
+                <span class="section-link" onclick="navigate('explore')">Tout voir ${icons.chevronRight}</span>
+            </div>
+            <div class="grid-3">${recent.map(a => renderCard(a)).join('')}</div>
+        </section>
+    </div>
+`;
+}
+
+function renderDetail(id) {
+    const a = announces.find(ann => ann.id === id);
+    if (!a) return '<div class="container"><p style="color:var(--white-50);padding:60px 0;">Annonce introuvable.</p></div>';
+    a.views++;
+    const isLiked = a.likedBy.includes(currentUser.id);
+    const similar = announces.filter(ann => ann.id !== a.id && ann.gameId === a.gameId).slice(0, 4);
+    return `
+    <div class="container">
+        <a class="back-link" onclick="navigate('explore')">${icons.arrowLeft} Retour aux annonces</a>
+        <div class="detail-layout">
+            <div class="detail-main">
+                <div class="detail-image-lg ${a.rarityClass}">
+                    <span class="item-emoji">${a.imageEmoji}</span>
+                    <span class="card-rarity rarity-${a.rarityClass}" style="position:absolute;top:16px;right:16px;">${a.rarity}</span>
+                </div>
+                <h2 style="font-size:1.5rem;font-weight:800;color:var(--white);letter-spacing:-0.02em;margin-bottom:4px;">${a.title}</h2>
+                <p style="color:var(--white-50);margin-bottom:12px;">${a.gameName}</p>
+                <p style="line-height:1.65;color:var(--white-70);margin-bottom:16px;">${a.description}</p>
+                <div class="detail-tags">
+                    <span class="tag">${a.gameName}</span>
+                    <span class="tag">${a.rarity}</span>
+                </div>
+                <div style="background:var(--bg-tertiary);padding:16px 18px;border-radius:var(--radius-lg);margin-top:16px;border:1px solid var(--border-light);">
+                    <strong style="color:var(--white);">🔍 Recherche :</strong>
+                    <span style="color:var(--white-70);">${a.searchFor}</span>
+                </div>
+            </div>
+            <div class="detail-sidebar">
+                <div class="sidebar-card">
+                    <div class="seller-row">
+                        <div class="avatar-md">${a.sellerAvatar}</div>
+                        <div class="seller-info">
+                            <div class="name">${a.sellerName}</div>
+                            <div class="sub">${icons.star} ${a.sellerRating} · ${a.sellerTrades} échanges</div>
+                        </div>
+                    </div>
+                    <button class="btn btn-primary btn-block btn-lg" onclick="openContactModal(${a.id})">
+                        ${icons.messageCircle} Je suis intéressé(e)
+                    </button>
+                </div>
+                <div class="sidebar-card">
+                    <div class="stat-item">${icons.eye} Vues <span class="stat-value">${a.views.toLocaleString()}</span></div>
+                    <div class="stat-item">
+                        <span style="cursor:pointer;display:flex;align-items:center;gap:10px;" onclick="toggleLike(${a.id})">
+                            ${isLiked ? icons.heartFilled.replace('fill="currentColor"','fill="#FF453A" style="color:#FF453A;"') : icons.heart}
+                            Likes
+                        </span>
+                        <span class="stat-value">${a.likes.toLocaleString()}</span>
+                    </div>
+                    <div class="stat-item">${icons.clock} Publié <span class="stat-value">${a.date}</span></div>
+                    <button class="btn btn-secondary btn-block mt-4" onclick="shareAnnounce(${a.id})">
+                        ${icons.share} Partager
+                    </button>
+                </div>
+                ${a.sellerId !== 'user1' ? `
+                <div class="sidebar-card">
+                    <div style="display:flex;align-items:center;gap:8px;margin-bottom:12px;">
+                        ${icons.shield}
+                        <span style="font-weight:700;color:var(--white);font-size:0.9rem;">Vendeur fiable</span>
+                    </div>
+                    <div style="font-size:0.82rem;color:var(--white-50);">
+                        ${a.sellerTrades} échanges réussis · Note ${a.sellerRating}/5
+                    </div>
+                </div>` : ''}
+            </div>
+        </div>
+        ${similar.length > 0 ? `
+        <section class="section" style="margin-top:40px;">
+            <div class="section-header"><h2>📦 Annonces similaires dans ${a.gameName}</h2></div>
+            <div class="carousel-wrap">
+                <button class="carousel-btn prev" onclick="scrollCarousel('similar', -1)">${icons.chevronLeft}</button>
+                <div class="carousel" id="carouselSimilar">${similar.map(a => renderCard(a)).join('')}</div>
+                <button class="carousel-btn next" onclick="scrollCarousel('similar', 1)">${icons.chevronRight}</button>
+            </div>
+        </section>` : ''}
+    </div>
+`;
+}
+
+function renderCreate() {
+    const steps = ['Le jeu', 'Ce que je possède', 'Ce que je recherche', 'Récapitulatif'];
+    return `
+    <div class="container" style="max-width:600px;">
+        <h2 style="font-size:1.4rem;font-weight:800;color:var(--white);margin-bottom:4px;">📝 Publier une annonce</h2>
+        <p style="color:var(--white-50);margin-bottom:20px;">Étape ${currentCreateStep}/4 · ${steps[currentCreateStep-1]}</p>
+        <div class="stepper">
+            ${steps.map((_, i) => `<div class="step-dot ${i+1 < currentCreateStep ? 'done' : ''} ${i+1 === currentCreateStep ? 'active' : ''}"></div>`).join('')}
+        </div>
+        ${renderCreateStep()}
+    </div>
+`;
+}
+
+function renderCreateStep() {
+    if (currentCreateStep === 1) {
+        return `
+        <div class="form-group"><label>Jeu Roblox *</label>
+            <select id="createGame">
+                <option value="">Sélectionnez un jeu...</option>
+                ${games.map(g => `<option value="${g.id}" ${createData.gameId===g.id?'selected':''}>${g.icon} ${g.name}</option>`).join('')}
+                <option value="other">✨ Autre (précisez)</option>
+            </select>
+        </div>
+        <div class="form-group hidden" id="otherGameGroup">
+            <label>Nom du jeu</label>
+            <input type="text" id="createOtherGame" placeholder="Ex: Mon Jeu RP..." value="${createData.otherGame||''}">
+        </div>
+        <button class="btn btn-primary" onclick="nextStep()">Continuer ${icons.arrowRight}</button>
+    `;
+    } else if (currentCreateStep === 2) {
+        return `
+        <div class="form-group"><label>Nom de l'item que tu possèdes *</label>
+            <input type="text" id="createTitle" placeholder="Ex: Aura Légendaire du Dragon" value="${createData.title||''}">
+        </div>
+        <div class="form-group"><label>Rareté</label>
+            <select id="createRarity">
+                <option value="Commun" ${createData.rarity==='Commun'?'selected':''}>Commun</option>
+                <option value="Rare" ${createData.rarity==='Rare'?'selected':''}>Rare</option>
+                <option value="Ultra-Rare" ${createData.rarity==='Ultra-Rare'?'selected':''}>Ultra-Rare</option>
+                <option value="Légendaire" ${createData.rarity==='Légendaire'?'selected':''}>Légendaire</option>
+                <option value="Mythique" ${createData.rarity==='Mythique'?'selected':''}>Mythique</option>
+            </select>
+        </div>
+        <div class="form-group"><label>Description</label>
+            <textarea id="createDescription" rows="3" placeholder="Décris ton item (effets, particularités, état...)">${createData.description||''}</textarea>
+        </div>
+        <div style="display:flex;gap:10px;">
+            <button class="btn btn-secondary" onclick="prevStep()">${icons.arrowLeft} Retour</button>
+            <button class="btn btn-primary" onclick="nextStep()">Continuer ${icons.arrowRight}</button>
+        </div>
+    `;
+    } else if (currentCreateStep === 3) {
+        return `
+        <div class="form-group"><label>Ce que tu recherches en échange *</label>
+            <textarea id="createSearchFor" rows="3" placeholder="Décris ce que tu veux recevoir en échange...">${createData.searchFor||''}</textarea>
+        </div>
+        <div style="display:flex;gap:10px;">
+            <button class="btn btn-secondary" onclick="prevStep()">${icons.arrowLeft} Retour</button>
+            <button class="btn btn-primary" onclick="nextStep()">Continuer ${icons.arrowRight}</button>
+        </div>
+    `;
+    } else {
+        const gameName = createData.otherGame || games.find(g => g.id === createData.gameId)?.name || createData.gameId;
+        const rcMap = { 'Commun': 'common', 'Rare': 'rare', 'Ultra-Rare': 'ultra-rare', 'Légendaire': 'legendary', 'Mythique': 'legendary' };
+        const rc = rcMap[createData.rarity] || 'common';
+        return `
+        <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-xl);padding:22px;margin-bottom:16px;">
+            <div class="card-image ${rc}" style="height:110px;border-radius:var(--radius-lg);margin-bottom:14px;">
+                <span class="item-emoji">📦</span>
+                <span class="card-rarity rarity-${rc}">${createData.rarity}</span>
+            </div>
+            <h3 style="color:var(--white);">${createData.title}</h3>
+            <p style="color:var(--white-50);">${gameName} · ${createData.rarity}</p>
+            <p style="color:var(--white-70);margin-top:8px;">${createData.description || 'Aucune description'}</p>
+            <div style="background:var(--bg-tertiary);padding:12px 14px;border-radius:var(--radius-md);margin-top:12px;border:1px solid var(--border-light);">
+                <strong style="color:var(--white);">🔍 Recherche :</strong>
+                <span style="color:var(--white-70);">${createData.searchFor}</span>
+            </div>
+        </div>
+        <div style="display:flex;gap:10px;">
+            <button class="btn btn-secondary" onclick="prevStep()">${icons.arrowLeft} Retour</button>
+            <button class="btn btn-primary" onclick="publishAnnounce()">${icons.check} Publier l'annonce</button>
+        </div>
+    `;
+    }
+}
+
+function nextStep() {
+    if (currentCreateStep === 1) {
+        const gameId = document.getElementById('createGame')?.value;
+        const otherGame = document.getElementById('createOtherGame')?.value;
+        if (!gameId) return showToast('⚠️ Sélectionne un jeu');
+        if (gameId === 'other' && !otherGame) return showToast('⚠️ Entre le nom du jeu');
+        createData.gameId = gameId;
+        createData.otherGame = otherGame || null;
+    } else if (currentCreateStep === 2) {
+        const title = document.getElementById('createTitle')?.value;
+        if (!title || !title.trim()) return showToast('⚠️ Entre le nom de ton item');
+        createData.title = title.trim();
+        createData.rarity = document.getElementById('createRarity')?.value || 'Commun';
+        createData.description = document.getElementById('createDescription')?.value || '';
+    } else if (currentCreateStep === 3) {
+        const sf = document.getElementById('createSearchFor')?.value;
+        if (!sf || !sf.trim()) return showToast('⚠️ Décris ce que tu recherches');
+        createData.searchFor = sf.trim();
+    }
+    if (currentCreateStep < 4) { currentCreateStep++; renderApp(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+}
+
+function prevStep() {
+    if (currentCreateStep > 1) { currentCreateStep--; renderApp(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
+}
+
+function publishAnnounce() {
+    const gameName = createData.otherGame || games.find(g => g.id === createData.gameId)?.name || createData.gameId;
+    const rcMap = { 'Commun': 'common', 'Rare': 'rare', 'Ultra-Rare': 'ultra-rare', 'Légendaire': 'legendary', 'Mythique': 'legendary' };
+    const emojiMap = { 'Commun': '⚪', 'Rare': '💙', 'Ultra-Rare': '💜', 'Légendaire': '⭐', 'Mythique': '🌟' };
+    announces.unshift({
+        id: nextId++,
+        gameId: createData.gameId,
+        gameName: gameName,
+        title: createData.title,
+        rarity: createData.rarity || 'Commun',
+        rarityClass: rcMap[createData.rarity] || 'common',
+        imageEmoji: emojiMap[createData.rarity] || '📦',
+        description: createData.description || '',
+        searchFor: createData.searchFor,
+        sellerId: currentUser.id,
+        sellerName: currentUser.pseudo,
+        sellerAvatar: currentUser.avatar,
+        sellerRating: currentUser.rating,
+        sellerTrades: currentUser.totalTrades,
+        views: 0,
+        likes: 0,
+        likedBy: [],
+        date: new Date().toISOString().split('T')[0],
+    });
+    currentUser.totalAnnounces++;
+    showToast('✅ Annonce publiée avec succès !');
+    navigate('home');
+}
+
+function renderExplore() {
+    let filtered = announces;
+    if (activeGameFilter) filtered = filtered.filter(a => a.gameId === activeGameFilter);
+    const gameName = activeGameFilter ? games.find(g => g.id === activeGameFilter)?.name : 'Tous les jeux';
+    return `
+    <div class="container">
+        <div style="display:flex;gap:24px;align-items:flex-start;">
+            <div style="width:220px;flex-shrink:0;">
+                <div style="background:var(--bg-card);border:1px solid var(--border-light);border-radius:var(--radius-xl);padding:20px;position:sticky;top:80px;">
+                    <h3 style="font-weight:700;color:var(--white);margin-bottom:16px;font-size:0.95rem;">Filtres</h3>
+                    <div style="margin-bottom:16px;">
+                        <div style="font-weight:600;font-size:0.8rem;color:var(--white-70);margin-bottom:8px;">JEU</div>
+                        <div style="display:flex;flex-direction:column;gap:4px;">
+                            <span style="cursor:pointer;font-size:0.82rem;padding:6px 8px;border-radius:var(--radius-sm);transition:var(--transition);${!activeGameFilter?'background:var(--orange-light);color:var(--orange);font-weight:600;':'color:var(--white-50);'}" onclick="activeGameFilter=null;navigate('explore')">🌟 Tous les jeux</span>
+                            ${games.map(g => `
+                                <span style="cursor:pointer;font-size:0.82rem;padding:6px 8px;border-radius:var(--radius-sm);transition:var(--transition);${activeGameFilter===g.id?'background:var(--orange-light);color:var(--orange);font-weight:600;':'color:var(--white-50);'}" onclick="activeGameFilter='${g.id}';navigate('explore')">${g.icon} ${g.name}</span>
+                            `).join('')}
+                        </div>
+                    </div>
+                    <button class="btn btn-secondary btn-sm btn-block" onclick="activeGameFilter=null;navigate('explore')">Réinitialiser</button>
+                </div>
+            </div>
+            <div style="flex:1;">
+                <h2 style="font-size:1.4rem;font-weight:800;color:var(--white);margin-bottom:6px;">🔍 ${gameName}</h2>
+                <p style="color:var(--white-50);margin-bottom:20px;">${filtered.length} annonce${filtered.length>1?'s':''} trouvée${filtered.length>1?'s':''}</p>
+                <div class="grid-3">${filtered.map(a => renderCard(a)).join('')}</div>
+                ${filtered.length===0 ? '<p style="text-align:center;color:var(--white-50);padding:60px 0;">Aucune annonce trouvée.</p>' : ''}
+            </div>
+        </div>
+    </div>
+`;
+}
+
+function renderProfile() {
+    const myAnnounces = announces.filter(a => a.sellerId === currentUser.id);
+    return `
+    <div class="container" style="max-width:800px;">
+        <div class="profile-header-card">
+            <div class="avatar-lg" style="margin:0 auto 14px;">${currentUser.avatar}</div>
+            <h2 style="font-weight:800;color:var(--white);">${currentUser.pseudo}</h2>
+            <p style="color:var(--white-50);">${currentUser.name} · Membre depuis ${currentUser.memberSince}</p>
+            <div class="profile-stats-row">
+                <div class="profile-stat"><div class="val">${myAnnounces.length}</div><div class="lbl">Annonces</div></div>
+                <div class="profile-stat"><div class="val">${currentUser.trades || 0}</div><div class="lbl">Échanges</div></div>
+                <div class="profile-stat"><div class="val">⭐ ${currentUser.rating || 5.0}</div><div class="lbl">Note</div></div>
+            </div>
+            <button class="btn btn-secondary mt-4" onclick="AuraAuth.logOut()">Se déconnecter</button>
+        </div>
+
+        <div style="display:flex;gap:4px;margin-bottom:20px;border-bottom:1px solid var(--border);">
+            <button class="btn btn-ghost" style="border-bottom:2px solid var(--orange);border-radius:0;color:var(--white);">Mes annonces</button>
+            <button class="btn btn-ghost" style="border-radius:0;" onclick="document.getElementById('tradeHistorySection').scrollIntoView({behavior:'smooth'})">Historique d'échanges</button>
+        </div>
+        <div class="grid-3">${myAnnounces.map(a => renderCard(a)).join('')}</div>
+        ${myAnnounces.length===0 ? '<p style="text-align:center;color:var(--white-50);padding:40px 0;">Aucune annonce publiée.</p>' : ''}
+        <div id="tradeHistorySection" style="margin-top:40px;">
+            <div class="section-header"><h2>${icons.barChart} Historique d'échanges</h2></div>
+            ${currentUser.tradeHistory.map(t => `
+                <div class="trade-history-item">
+                    <div class="avatar-sm">${t.with[0]}</div>
+                    <div style="flex:1;">
+                        <strong style="color:var(--white);">${t.with}</strong>
+                        <div style="font-size:0.8rem;color:var(--white-50);">${t.given} ↔️ ${t.received}</div>
+                    </div>
+                    <span class="trade-arrow">↔️</span>
+                    <div style="text-align:right;">
+                        <div style="color:var(--legendary);">${'⭐'.repeat(t.rating)}</div>
+                        <div style="font-size:0.72rem;color:var(--white-30);">${t.date}</div>
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    </div>
+`;
+}
+
+function renderMessages() {
+    messages.forEach(m => { if (m.toUserId === currentUser.id) m.read = true; });
+    const conversations = {};
+    messages.forEach(m => {
+        const otherId = m.fromUserId === currentUser.id ? m.toUserId : m.fromUserId;
+        if (!conversations[otherId]) conversations[otherId] = [];
+        conversations[otherId].push(m);
+    });
+    const usersMap = { 'user2': { name: 'EmmaDubois', avatar: 'E' }, 'user3': { name: 'TheoGamer', avatar: 'T' }, 'user4': { name: 'SarahPets', avatar: 'S' }, 'user5': { name: 'KnifeKing', avatar: 'K' } };
+    return `
+    <div class="container" style="max-width:700px;">
+        <h2 style="font-size:1.4rem;font-weight:800;color:var(--white);margin-bottom:20px;">💬 Messages</h2>
+        ${Object.keys(conversations).length === 0 ? '<p style="text-align:center;color:var(--white-50);padding:60px 0;">Aucun message.</p>' :
+        Object.keys(conversations).map(otherId => {
+            const conv = conversations[otherId].sort((a,b)=>new Date(b.date)-new Date(a.date));
+            const last = conv[0];
+            const u = usersMap[otherId] || {name:'Utilisateur',avatar:'?'};
+            const hasUnread = conv.some(m=>m.toUserId===currentUser.id&&!m.read);
+            const announce = announces.find(a=>a.id===conv[0].announceId);
+            return `
+            <div class="msg-preview ${hasUnread?'unread':''}" onclick="openChat('${otherId}')">
+                <div class="avatar-sm">${u.avatar}</div>
+                <div style="flex:1;">
+                    <strong style="color:var(--white);">${u.name}</strong>
+                    <p style="font-size:0.78rem;color:var(--white-50);">${announce ? 'Re: '+announce.title : 'Conversation'}</p>
+                    <p style="font-size:0.75rem;color:var(--white-30);">${last.content.substring(0,55)}...</p>
+                </div>
+                ${hasUnread ? '<span style="width:8px;height:8px;background:var(--orange);border-radius:50%;flex-shrink:0;"></span>' : ''}
+            </div>`;
+        }).join('')}
+    </div>
+`;
+}
+
+// ==================== MODALS ====================
+function openContactModal(announceId) {
+    const a = announces.find(ann => ann.id === announceId);
+    if (!a) return;
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'activeModal';
+    overlay.innerHTML = `
+    <div class="modal">
+        <h3>💬 Contacter ${a.sellerName}</h3>
+        <p class="subtitle">Annonce : <strong style="color:var(--white);">${a.title}</strong><br>Recherche : ${a.searchFor}</p>
+        <div class="form-group">
+            <label>Ton message</label>
+            <textarea id="contactMsg" placeholder="Explique ce que tu proposes en échange..."></textarea>
+        </div>
+        <div class="modal-actions">
+            <button class="btn btn-secondary" onclick="closeModal()">Annuler</button>
+            <button class="btn btn-primary" onclick="sendContactMsg(${announceId})">${icons.send} Envoyer</button>
+        </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+}
+
+function sendContactMsg(announceId) {
+    const content = document.getElementById('contactMsg')?.value.trim();
+    if (!content) return showToast('⚠️ Écris un message');
+    const a = announces.find(ann => ann.id === announceId);
+    if (!a) return;
+    messages.push({ id: messages.length + 1, announceId, fromUserId: currentUser.id, toUserId: a.sellerId, content, date: new Date().toISOString(), read: false });
+    closeModal();
+    showToast('✅ Message envoyé à ' + a.sellerName);
+    updateBadges();
+}
+
+function openChat(otherId) {
+    const conv = messages.filter(m =>
+        (m.fromUserId === currentUser.id && m.toUserId === otherId) ||
+        (m.toUserId === currentUser.id && m.fromUserId === otherId)
+    ).sort((a, b) => new Date(a.date) - new Date(b.date));
+    const usersMap = { 'user2': { name: 'EmmaDubois', avatar: 'E' }, 'user3': { name: 'TheoGamer', avatar: 'T' }, 'user4': { name: 'SarahPets', avatar: 'S' }, 'user5': { name: 'KnifeKing', avatar: 'K' } };
+    const u = usersMap[otherId] || { name: 'Utilisateur', avatar: '?' };
+    const overlay = document.createElement('div');
+    overlay.className = 'modal-overlay';
+    overlay.id = 'activeModal';
+    overlay.innerHTML = `
+    <div class="modal" style="max-width:540px;">
+        <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+            <div class="avatar-sm">${u.avatar}</div>
+            <strong style="color:var(--white);">${u.name}</strong>
+        </div>
+        <div class="msg-thread" id="chatThread">
+            ${conv.map(m => `
+                <div class="msg-bubble ${m.fromUserId===currentUser.id?'sent':'received'}">
+                    ${m.content}
+                    <div class="time">${new Date(m.date).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>
+                </div>
+            `).join('')}
+        </div>
+        <div style="display:flex;gap:8px;margin-top:14px;">
+            <input type="text" id="chatInput" placeholder="Écris ton message..." style="flex:1;padding:11px 14px;background:var(--bg-input);border:1.5px solid var(--border);border-radius:var(--radius-full);color:var(--white);font-family:'Inter',sans-serif;outline:none;">
+            <button class="btn btn-primary" onclick="sendChatMsg('${otherId}')">${icons.send}</button>
+        </div>
+    </div>`;
+    document.body.appendChild(overlay);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
+    setTimeout(() => { const t = document.getElementById('chatThread'); if (t) t.scrollTop = t.scrollHeight; }, 150);
+}
+
+function sendChatMsg(otherId) {
+    const input = document.getElementById('chatInput');
+    const content = input?.value.trim();
+    if (!content) return;
+    const refMsg = messages.find(m =>
+        (m.fromUserId === currentUser.id && m.toUserId === otherId) ||
+        (m.toUserId === currentUser.id && m.fromUserId === otherId)
+    );
+    messages.push({ id: messages.length + 1, announceId: refMsg?.announceId || 1, fromUserId: currentUser.id, toUserId: otherId, content, date: new Date().toISOString(), read: true });
+    closeModal();
+    openChat(otherId);
+}
+
+function closeModal() {
+    const m = document.getElementById('activeModal');
+    if (m) m.remove();
+}
+
+// ==================== ACTIONS ====================
+function toggleLike(announceId, btnEl) {
+    if (!AuraAuth.getUser()) {
+        window.location.href = 'login.html';
+        return;
+    }
+    const a = announces.find(ann => ann.id === announceId);
+
+    if (!a) return;
+    const idx = a.likedBy.indexOf(currentUser.id);
+    if (idx > -1) { a.likedBy.splice(idx, 1); a.likes = Math.max(0, a.likes - 1); } else { a.likedBy.push(currentUser.id); a.likes++; }
+    if (btnEl) { btnEl.classList.add('just-liked'); setTimeout(() => btnEl.classList.remove('just-liked'), 400); }
+    renderApp();
+}
+
+function shareAnnounce(id) {
+    const url = window.location.origin + window.location.pathname + '?page=detail&id=' + id;
+    if (navigator.clipboard) { navigator.clipboard.writeText(url).then(() => showToast('📋 Lien copié !')); } else showToast('📋 Lien: ' + url);
+}
+
+function scrollCarousel(name, dir) {
+    const el = document.getElementById(name === 'featured' ? 'carouselFeatured' : 'carouselSimilar');
+    if (el) el.scrollBy({ left: dir * 290, behavior: 'smooth' });
+}
+
+function showToast(msg) {
+    const container = document.getElementById('toastContainer');
+    const t = document.createElement('div');
+    t.className = 'toast';
+    t.textContent = msg;
+    container.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; t.style.transform = 'translateX(120%)'; t.style.transition = '0.3s ease'; setTimeout(() => t.remove(), 350); }, 2600);
+}
+
+// ==================== LISTENERS ====================
+function attachListeners() {
+    document.getElementById('heroSearchInput')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { activeGameFilter = null; navigate('explore'); }
+    });
+    document.getElementById('headerSearchInput')?.addEventListener('keypress', function(e) {
+        if (e.key === 'Enter') { activeGameFilter = null; navigate('explore'); }
+    });
+    const cg = document.getElementById('createGame');
+    if (cg) {
+        cg.addEventListener('change', function() {
+            const og = document.getElementById('otherGameGroup');
+            if (og) og.classList.toggle('hidden', this.value !== 'other');
+        });
+        if (cg.value === 'other') document.getElementById('otherGameGroup')?.classList.remove('hidden');
+    }
+}
+
+// ==================== INIT ====================
+function init() {
+    refreshUserData();
+    const params = new URLSearchParams(window.location.search);
+
+    const page = params.get('page');
+    const id = params.get('id');
+    if (page === 'detail' && id) navigate('detail', parseInt(id));
+    else if (page === 'explore') navigate('explore');
+    else navigate('home');
+}
+init();
+console.log('%c⚡ Aura Trade %cPrototype Pro %cChargé', 'color:#FF6B2B;font-size:1.4em;font-weight:900;', 'color:#fff;font-size:1em;', 'color:#aaa;');
