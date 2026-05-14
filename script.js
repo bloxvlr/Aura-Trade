@@ -1070,7 +1070,7 @@ function renderProfile() {
         <div id="tradeHistorySection" style="margin-top:40px;">
 
             <div class="section-header"><h2>${icons.barChart} Historique d'échanges</h2></div>
-            ${currentUser.tradeHistory.map(t => `
+            ${(currentUser.tradeHistory || []).map(t => `
                 <div class="trade-history-item">
                     <div class="avatar-sm">${t.with[0]}</div>
                     <div style="flex:1;">
