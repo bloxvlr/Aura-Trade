@@ -194,9 +194,9 @@ function renderCard(a) {
 
 function renderHome() {
     // Premium announces get a large score boost to be at the top of featured
-    const getScore = (a) => (a.views + a.likes*5) + (a.sellerPremium ? 10000 : 0);
+    const getScore = (a) => ((a.views || 0) + (a.likes || 0)*5) + (a.sellerPremium ? 10000 : 0);
     const featured = [...announces].sort((a, b) => getScore(b) - getScore(a)).slice(0, 5);
-    const recent = [...announces].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
+    const recent = [...announces].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).slice(0, 6);
 
 
     return `
@@ -499,7 +499,7 @@ async function nextStepImage() {
 
     if (fileInput && fileInput.files[0]) {
         const file = fileInput.files[0];
-        if (file.size > 8 * 1024 * 1024) return showToast('⚠️ L\\'image ne doit pas dépasser 8 MB');
+        if (file.size > 8 * 1024 * 1024) return showToast("⚠️ L'image ne doit pas dépasser 8 MB");
         
         // Compress image using canvas
         const reader = new FileReader();
@@ -1472,5 +1472,6 @@ async function init() {
     else if (page === 'explore') navigate('explore');
     else navigate('home');
 }
+
 init();
 console.log('%c⚡ Aura Trade %cPrototype Pro %cChargé', 'color:#FF6B2B;font-size:1.4em;font-weight:900;', 'color:#fff;font-size:1em;', 'color:#aaa;');
