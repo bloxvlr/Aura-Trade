@@ -584,6 +584,7 @@ async function publishAnnounce() {
             announces.unshift(data[0]);
         } catch (e) {
             console.error('Supabase save failed:', e);
+            showToast('Erreur DB : ' + (e.message || JSON.stringify(e)));
             newAnnounce.id = Date.now();
             announces.unshift(newAnnounce);
         }
