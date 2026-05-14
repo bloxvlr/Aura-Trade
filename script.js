@@ -60,6 +60,7 @@ function refreshUserData() {
 }
 
 
+
 const games = [
     { id: 'schoolfr', name: 'School Fr RP', icon: '🏫' },
     { id: 'adoptme', name: 'Adopt Me !', icon: '🐾' },
@@ -83,7 +84,7 @@ let activeGameFilter = null;
 // ==================== NAVIGATION ====================
 function navigate(page, param) {
     // Pages requiring authentication
-    const authRequired = ['detail', 'create', 'messages', 'profile', 'favorites', 'settings'];
+    const authRequired = ['detail', 'create', 'messages', 'profile', 'favorites', 'settings', 'admin'];
     if (authRequired.includes(page) && !AuraAuth.getUser()) {
         window.location.href = 'login.html';
         return;
@@ -110,6 +111,7 @@ function navigate(page, param) {
 
 
 
+
 // ==================== RENDER ====================
 function renderApp() {
     const container = document.getElementById('appContent');
@@ -122,7 +124,11 @@ function renderApp() {
         'messages': renderMessages,
         'favorites': renderFavorites,
         'settings': renderSettings,
+        'admin': renderAdmin,
+        'premium': renderPremium,
     };
+
+
     container.innerHTML = (pages[currentPage] || renderHome)();
     attachListeners();
     updateBadges();
@@ -138,8 +144,12 @@ function updateBadges() {
 function renderCard(a) {
     const isLiked = (a.likedBy || []).includes(currentUser.id);
     const imageStyle = a.imageUrl ? `background-image:url(${a.imageUrl}); background-size:cover;` : '';
+    const premiumClass = a.sellerPremium ? 'premium-card' : '';
+    const pseudoClass = a.sellerPremium ? 'animated-pseudo' : '';
+    const badge = a.sellerPremium ? `<span class="premium-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></span>` : '';
+    
     return `
-    <div class="card" onclick="navigate('detail', ${a.id})">
+    <div class="card ${premiumClass}" onclick="navigate('detail', ${a.id})">
         <div class="card-image ${a.rarityClass}" style="${imageStyle}">
             ${!a.imageUrl ? `<span class="item-emoji">${a.imageEmoji}</span>` : ''}
             <span class="card-rarity rarity-${a.rarityClass}">${a.rarity}</span>
@@ -148,6 +158,7 @@ function renderCard(a) {
             <div class="card-game">${a.gameName}</div>
             <div class="card-title">${a.title}</div>
             <div class="card-search">Cherche : ${a.searchFor}</div>
+            <div style="font-size:0.8rem;color:var(--white-50);margin-top:8px;">Par <span class="${pseudoClass}">${a.sellerName}</span>${badge}</div>
             <div class="card-footer">
                 <div class="card-stats">
                     <span>${icons.eye} ${a.views || 0}</span>
@@ -163,9 +174,13 @@ function renderCard(a) {
 }
 
 
+
 function renderHome() {
-    const featured = [...announces].sort((a, b) => (b.views + b.likes*5) - (a.views + a.likes*5)).slice(0, 5);
+    // Premium announces get a large score boost to be at the top of featured
+    const getScore = (a) => (a.views + a.likes*5) + (a.sellerPremium ? 10000 : 0);
+    const featured = [...announces].sort((a, b) => getScore(b) - getScore(a)).slice(0, 5);
     const recent = [...announces].sort((a, b) => new Date(b.date) - new Date(a.date)).slice(0, 6);
+
 
     return `
     <div class="container">
@@ -273,8 +288,9 @@ function renderDetail(id) {
                     <div class="seller-header">
                         <div class="avatar-md">${a.sellerAvatar}</div>
                         <div class="seller-meta">
-                            <div class="seller-name">${a.sellerName}</div>
+                            <div class="seller-name ${a.sellerPremium ? 'animated-pseudo' : ''}">${a.sellerName} ${a.sellerPremium ? '<span class="premium-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></span>' : ''}</div>
                             <div class="seller-rating">
+
                                 ${icons.star} <span>${a.sellerRating || '5.0'}</span>
                                 <span class="dot">·</span>
                                 <span>${a.sellerTrades || 0} échanges</span>
@@ -481,8 +497,10 @@ async function publishAnnounce() {
         sellerAvatar: currentUser.avatar,
         sellerRating: currentUser.rating,
         sellerTrades: currentUser.trades || 0,
+        sellerPremium: currentUser.is_premium || false,
         views: 0,
         likes: 0,
+
         likedBy: [],
         date: new Date().toISOString().split('T')[0],
     };
@@ -560,13 +578,25 @@ function renderSettings() {
         <div class="sidebar-card">
             <h3 class="section-title">Profil</h3>
             <div class="form-group">
-                <label>Nom d'utilisateur (Pseudo)</label>
+                <label>Nom d'utilisateur (Pseudo) ${currentUser.is_premium ? '<span style="color:#FFD700;font-size:0.7rem;">(Premium: Pas de délai)</span>' : '<span style="color:var(--white-50);font-size:0.7rem;">(Changeable tous les 24h)</span>'}</label>
                 <input type="text" id="settingsPseudo" value="${currentUser.pseudo}" placeholder="Ton pseudo Roblox...">
             </div>
+            ${currentUser.is_premium ? `
+            <div class="form-group">
+                <label style="color:#FFD700;">Avatar Premium (URL ou GIF)</label>
+                <input type="text" id="settingsAvatarUrl" value="${currentUser.picture || ''}" placeholder="Lien vers une image ou un GIF (Imgur, Discord...)">
+            </div>
+            ` : `
+            <div class="form-group" style="opacity:0.5;pointer-events:none;">
+                <label>Avatar Personnalisé <span style="color:#FFD700;font-size:0.7rem;">(⭐ Réservé Premium)</span></label>
+                <input type="text" placeholder="Débloque le Premium pour utiliser un GIF !">
+            </div>
+            `}
             <button class="btn btn-primary" onclick="updateProfile()">Enregistrer les modifications</button>
         </div>
 
         <div class="sidebar-card mt-4">
+
             <h3 class="section-title">Sécurité & Compte</h3>
             <p style="color:var(--white-50);font-size:0.9rem;margin-bottom:16px;">
                 Connecté avec : <strong style="color:var(--white);">${currentUser.email || 'Google Account'}</strong>
@@ -580,55 +610,289 @@ function renderSettings() {
                 </button>
             </div>
         </div>
-
-        <div class="sidebar-card mt-4" style="background:rgba(255, 255, 255, 0.02);border-style:dashed;">
-            <h3 class="section-title" style="font-size:0.9rem;">Besoin d'aide ?</h3>
-            <p style="font-size:0.8rem;color:var(--white-30);">Si vous rencontrez un problème technique ou souhaitez signaler un bug, contactez le support Aura Trade.</p>
-        </div>
+        
+        ${currentUser.email === 'the.furtive.guys@gmail.com' ? `
+        <div class="sidebar-card mt-4" style="background:rgba(255,107,43,0.1);border-color:var(--orange);">
+            <h3 class="section-title" style="color:var(--orange);">Mode Administrateur</h3>
+            <button class="btn btn-primary btn-block" onclick="navigate('admin')">Accéder au Panel Admin</button>
+        </div>` : ''}
     </div>
 `;
 }
+
+function renderAdmin() {
+    if (currentUser.email !== 'the.furtive.guys@gmail.com') return '<div class="container">Accès refusé</div>';
+    
+    // Simulate some stats if DB fetch is slow or unavailable for all profiles
+    const totalAnnounces = announces.length;
+    
+    return `
+    <div class="container">
+        <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:24px;">
+            <h2 style="font-size:1.6rem;font-weight:800;color:var(--orange);">👑 Panel d'Administration</h2>
+            <button class="btn btn-secondary" onclick="navigate('settings')">Retour</button>
+        </div>
+
+        <div class="grid-3" style="margin-bottom:24px;">
+            <div class="sidebar-card"><div style="color:var(--white-50);">Total Annonces</div><div style="font-size:1.5rem;font-weight:800;">${totalAnnounces}</div></div>
+            <div class="sidebar-card">
+                <div style="color:var(--white-50);">Gérer Utilisateurs</div>
+                <button class="btn btn-secondary btn-sm mt-2" onclick="adminShowUsers()">Ouvrir</button>
+            </div>
+            <div class="sidebar-card"><div style="color:var(--white-50);">Modération Annonces</div><button class="btn btn-secondary btn-sm mt-2" onclick="adminShowAnnounces()">Ouvrir</button></div>
+        </div>
+        
+        <div class="sidebar-card" style="margin-bottom:24px;border-color:#A23AFF;">
+            <h3 class="section-title" style="color:#A23AFF;">Donner Premium par Email</h3>
+            <div style="display:flex;gap:10px;">
+                <input type="text" id="adminGrantEmail" placeholder="adresse@email.com" style="flex:1;">
+                <button class="btn btn-primary" style="background:#A23AFF;border:none;" onclick="adminGrantPremiumByEmail()">Activer Premium</button>
+            </div>
+        </div>
+
+        <div id="adminView" class="sidebar-card">
+            <p style="color:var(--white-50);">Sélectionnez une action ci-dessus.</p>
+        </div>
+
+    </div>
+    `;
+}
+
+async function adminShowUsers() {
+    const view = document.getElementById('adminView');
+    view.innerHTML = '<p>Chargement des utilisateurs...</p>';
+    if (!AuraAuth._supabase) return view.innerHTML = '<p>Erreur: Supabase non connecté.</p>';
+    
+    const { data: users, error } = await AuraAuth._supabase.from('profiles').select('*');
+    if (error) return view.innerHTML = '<p>Erreur: ' + error.message + '</p>';
+    
+    const onlineUsers = users.filter(u => u.last_seen && (Date.now() - new Date(u.last_seen).getTime()) < 3600000).length;
+    
+    view.innerHTML = `
+        <h3 class="section-title">Utilisateurs inscrits (${users.length} total, ${onlineUsers} en ligne récemment)</h3>
+        <div style="max-height:400px;overflow-y:auto;">
+            ${users.map(u => `
+                <div style="padding:10px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong style="color:var(--white);">${u.pseudo || 'Sans pseudo'}</strong>
+                        <div style="font-size:0.8rem;color:var(--white-50);">${u.email || 'Email masqué'}</div>
+                    </div>
+                    <div style="display:flex; gap:8px;">
+                        <button class="btn btn-secondary btn-sm" onclick="adminEditPseudo('${u.id}', '${u.pseudo}')">Renommer</button>
+                        ${u.is_premium ? `<button class="btn btn-ghost btn-sm" style="color:#FFD700;" onclick="adminRevokePremium('${u.id}')">Retirer Premium</button>` 
+                                       : `<button class="btn btn-ghost btn-sm" style="color:#FFD700;" onclick="adminGrantPremium('${u.id}')">⭐ Donner Premium</button>`}
+                        <button class="btn btn-secondary btn-sm" onclick="adminContact('${u.id}', '${u.pseudo}')">Message</button>
+                        <button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="adminBan('${u.id}')">Bannir</button>
+
+                    </div>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+async function adminEditPseudo(userId, currentPseudo) {
+    const p = prompt('Nouveau pseudo pour ' + currentPseudo + ' :');
+    if (!p) return;
+    await AuraAuth._supabase.from('profiles').update({ pseudo: p }).eq('id', userId);
+    showToast('✅ Pseudo mis à jour');
+    adminShowUsers();
+}
+
+async function adminContact(userId, pseudo) {
+    const m = prompt('Message pour ' + pseudo + ' :');
+    if (!m) return;
+    await AuraAuth._supabase.from('messages').insert([{
+        fromUserId: currentUser.id,
+        toUserId: userId,
+        content: "[Message de l'Admin] " + m,
+        date: new Date().toISOString()
+    }]);
+    showToast('✉️ Message envoyé');
+}
+
+async function adminBan(userId) {
+    if (!confirm('Bannir définitivement cet utilisateur ? (Nécessite la colonne "banned" dans la table profiles)')) return;
+    await AuraAuth._supabase.from('profiles').update({ banned: true }).eq('id', userId);
+    showToast('🚫 Utilisateur banni');
+}
+
+function adminShowAnnounces() {
+    const view = document.getElementById('adminView');
+    view.innerHTML = `
+        <h3 class="section-title">Toutes les annonces</h3>
+        <div style="max-height:400px;overflow-y:auto;">
+            ${announces.map(a => `
+                <div style="padding:10px; border-bottom:1px solid var(--border); display:flex; justify-content:space-between; align-items:center;">
+                    <div>
+                        <strong style="color:var(--white);">${a.title}</strong>
+                        <div style="font-size:0.8rem;color:var(--white-50);">Par ${a.sellerName} (ID: ${a.id})</div>
+                    </div>
+                    <button class="btn btn-ghost btn-sm" style="color:var(--danger);" onclick="adminDeleteAnnounce(${a.id})">Supprimer</button>
+                </div>
+            `).join('')}
+        </div>
+    `;
+}
+
+async function adminDeleteAnnounce(id) {
+    if (!confirm('Supprimer cette annonce ?')) return;
+    await AuraAuth._supabase.from('announces').delete().eq('id', id);
+    announces = announces.filter(a => a.id !== id);
+    showToast('🗑️ Annonce supprimée');
+    adminShowAnnounces();
+}
+
+async function adminGrantPremiumByEmail() {
+    const email = document.getElementById('adminGrantEmail')?.value.trim();
+    if (!email) return showToast('⚠️ Entrez une adresse email');
+    if (!AuraAuth._supabase) return showToast('❌ Supabase non connecté');
+    
+    const { data, error } = await AuraAuth._supabase.from('profiles').update({ is_premium: true }).eq('email', email).select();
+    if (error) return showToast('❌ Erreur : ' + error.message);
+    if (!data || data.length === 0) return showToast('❌ Aucun utilisateur trouvé avec cet email');
+    
+    showToast('⭐ Premium accordé à ' + email);
+    document.getElementById('adminGrantEmail').value = '';
+    if (document.getElementById('adminView').innerHTML.includes('Utilisateurs inscrits')) {
+        adminShowUsers();
+    }
+}
+
+async function adminGrantPremium(userId) {
+
+    if (!confirm('Donner le grade Premium à cet utilisateur ? (Nécessite la colonne is_premium)')) return;
+    await AuraAuth._supabase.from('profiles').update({ is_premium: true }).eq('id', userId);
+    showToast('⭐ Premium accordé');
+    adminShowUsers();
+}
+
+async function adminRevokePremium(userId) {
+    if (!confirm('Retirer le grade Premium à cet utilisateur ?')) return;
+    await AuraAuth._supabase.from('profiles').update({ is_premium: false }).eq('id', userId);
+    showToast('❌ Premium retiré');
+    adminShowUsers();
+}
+
+function renderPremium() {
+    const checkIcon = `<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>`;
+    
+    return `
+    <div class="container" style="max-width:800px; padding: 40px 14px;">
+        <div class="premium-hero">
+            <h1 style="font-size:2.8rem;font-weight:900;color:#A23AFF;margin-bottom:16px;letter-spacing:-0.03em;">Aura Trade <span style="color:#FFD700;">Premium</span></h1>
+            <p style="color:var(--white-70);font-size:1.1rem;max-width:600px;margin:0 auto;">
+                L'abonnement ultime pour dominer le marché. Obtenez une visibilité inégalée et un statut exclusif sur la plateforme.
+            </p>
+        </div>
+
+        <div class="pricing-card">
+            <h3 style="color:#A23AFF; text-transform:uppercase; font-size:0.85rem; letter-spacing:0.1em; margin-bottom:12px; font-weight:800;">Abonnement Élitis</h3>
+            <div class="pricing-price">Sur Devis <span>/ à vie</span></div>
+            <p style="color:var(--white-50);font-size:0.9rem;border-bottom:1px solid rgba(255,255,255,0.1);padding-bottom:24px;margin-bottom:24px;">Places strictement limitées. Soumis à validation.</p>
+            
+            <ul class="pricing-features">
+                <li>${checkIcon} <strong>Logo Certifié</strong> officiel à côté de votre pseudo</li>
+                <li>${checkIcon} <strong>Pseudo Animé</strong> avec effet de dégradé exclusif</li>
+                <li>${checkIcon} <strong>Changement de Pseudo illimité</strong> (plus d'attente de 24h)</li>
+                <li>${checkIcon} <strong>Boost Algorithmique :</strong> Annonces toujours en tête de l'Accueil</li>
+                <li>${checkIcon} <strong>Cartes Premium :</strong> Effet de lueur dorée sur vos annonces</li>
+                <li>${checkIcon} <strong>Avatar GIF :</strong> Débloquez les photos de profil animées</li>
+            </ul>
+
+            <div style="background:var(--bg-tertiary);border-radius:var(--radius-lg);padding:20px;text-align:center;margin-top:30px;">
+                <p style="font-weight:600;color:var(--white-90);margin-bottom:12px;font-size:0.9rem;">Pour souscrire, contactez la direction sur Discord :</p>
+                <div style="display:flex;align-items:center;justify-content:center;gap:12px;">
+                    <code style="background:var(--bg-body);padding:10px 20px;border-radius:var(--radius-md);font-size:1.1rem;color:#A23AFF;font-weight:bold;letter-spacing:1px;">blox.vlr.</code>
+                    <button class="btn btn-purple" style="width:auto;padding:10px 20px;" onclick="navigator.clipboard.writeText('blox.vlr.');showToast('📋 Pseudo Discord copié !')">Copier</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    `;
+}
+
+
+
+
 
 async function confirmDeleteAccount() {
     if (confirm("⚠️ Êtes-vous sûr de vouloir supprimer votre compte ? Cette action est irréversible et supprimera votre profil ainsi que toutes vos annonces.")) {
         if (AuraAuth._supabase) {
             try {
                 // Delete profile from DB (announces will cascade if foreign key is set to cascade)
-                const { error } = await AuraAuth._supabase.from('profiles').delete().eq('id', currentUser.id);
-                if (error) throw error;
-                
-                showToast('👋 Compte supprimé avec succès.');
-                AuraAuth.logOut();
+                await AuraAuth._supabase.from('profiles').delete().eq('id', currentUser.id);
             } catch (e) {
                 console.error(e);
-                showToast('❌ Erreur lors de la suppression.');
             }
-        } else {
-            AuraAuth.logOut();
         }
+        
+        // Force logout locally regardless of DB success
+        showToast('👋 Compte supprimé avec succès.');
+        localStorage.removeItem('aura_user');
+        setTimeout(() => { window.location.href = 'index.html'; }, 800);
     }
 }
+
 
 
 async function updateProfile() {
     const newPseudo = document.getElementById('settingsPseudo')?.value.trim();
     if (!newPseudo) return showToast('⚠️ Le pseudo ne peut pas être vide');
     
-    currentUser.pseudo = newPseudo;
+    let updates = {};
+    let needsUpdate = false;
+    
+    if (newPseudo !== currentUser.pseudo) {
+        // Check 24h cooldown if NOT premium
+        if (!currentUser.is_premium) {
+            const lastChange = localStorage.getItem('last_pseudo_change');
+            if (lastChange) {
+                const hoursPassed = (Date.now() - parseInt(lastChange)) / (1000 * 60 * 60);
+                if (hoursPassed < 24) {
+                    const hoursLeft = Math.ceil(24 - hoursPassed);
+                    return showToast(`⏳ Attends encore ${hoursLeft}h pour changer de pseudo.`);
+                }
+            }
+        }
+        currentUser.pseudo = newPseudo;
+        updates.pseudo = newPseudo;
+        needsUpdate = true;
+        localStorage.setItem('last_pseudo_change', Date.now().toString());
+    }
+
+    if (currentUser.is_premium) {
+        const newAvatar = document.getElementById('settingsAvatarUrl')?.value.trim();
+        if (newAvatar !== currentUser.picture) {
+            currentUser.picture = newAvatar;
+            updates.avatar_url = newAvatar;
+            needsUpdate = true;
+        }
+    }
+    
+    if (!needsUpdate) return showToast('⚠️ Aucune modification détectée');
+    
+    localStorage.setItem('aura_user', JSON.stringify(currentUser)); // Save locally
+    
     if (AuraAuth._supabase) {
         try {
-            const { error } = await AuraAuth._supabase.from('profiles').update({ pseudo: newPseudo }).eq('id', currentUser.id);
+            const { error } = await AuraAuth._supabase.from('profiles').update(updates).eq('id', currentUser.id);
             if (error) throw error;
             showToast('✅ Profil mis à jour !');
-            refreshUserData();
-            renderApp();
-        } catch (e) { console.error(e); showToast('❌ Erreur lors de la mise à jour'); }
+        } catch (e) { 
+            console.error(e); 
+            showToast('❌ Erreur base de données (Profil local mis à jour)'); 
+        }
     } else {
         showToast('✅ Profil mis à jour !');
-        refreshUserData();
-        renderApp();
     }
+    
+    refreshUserData();
+    renderApp();
 }
+
+
+
 
 
 function renderProfile() {
@@ -889,21 +1153,29 @@ function openPseudoSetupModal() {
         </div>
     </div>`;
     document.body.appendChild(overlay);
+    // Mandatory: no overlay click closing
 }
+
 
 async function saveInitialPseudo() {
     const p = document.getElementById('setupPseudo')?.value.trim();
     if (!p) return showToast('⚠️ Entre un pseudo !');
     
     currentUser.pseudo = p;
+    localStorage.setItem('aura_user', JSON.stringify(currentUser));
+    localStorage.setItem('last_pseudo_change', Date.now().toString());
+    
     if (AuraAuth._supabase) {
         await AuraAuth._supabase.from('profiles').update({ pseudo: p }).eq('id', currentUser.id);
     }
-    closeModal();
+    const modal = document.getElementById('activeModal');
+    if (modal) modal.remove();
+    
     showToast('🚀 C\'est parti, ' + p + ' !');
     refreshUserData();
     renderApp();
 }
+
 
 
 
@@ -976,9 +1248,10 @@ async function init() {
     await fetchMessages();
     
     // Check if user needs to set a pseudo
-    if (currentUser.id !== 'guest' && (!currentUser.pseudo || currentUser.pseudo.startsWith('User_'))) {
+    if (currentUser.id !== 'guest' && !currentUser.pseudo) {
         openPseudoSetupModal();
     }
+
     
     const params = new URLSearchParams(window.location.search);
 
