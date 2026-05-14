@@ -60,7 +60,6 @@ function refreshUserData() {
 }
 
 
-
 const games = [
     { id: 'schoolfr', name: 'School Fr RP', icon: '🏫' },
     { id: 'adoptme', name: 'Adopt Me !', icon: '🐾' },
@@ -70,25 +69,13 @@ const games = [
     { id: 'brookhaven', name: 'Brookhaven RP', icon: '🏘️' },
 ];
 
-let announces = [
-    { id: 1, gameId: 'schoolfr', gameName: 'School Fr RP', title: 'Aura Légendaire du Dragon Ancestral', rarity: 'Légendaire', rarityClass: 'legendary', imageEmoji: '🐉', description: 'Aura légendaire extrêmement rare obtenue lors de l\'événement Dragon Ancestral. Effet de flammes bleues autour du personnage. Très recherchée.', searchFor: 'Une autre aura légendaire ou une tenue complète de directeur', sellerId: 'user2', sellerName: 'EmmaDubois', sellerAvatar: 'E', sellerRating: 4.9, sellerTrades: 15, views: 1247, likes: 89, likedBy: [], date: '2026-05-10' },
-    { id: 2, gameId: 'schoolfr', gameName: 'School Fr RP', title: 'Pass VIP Permanent', rarity: 'Ultra-Rare', rarityClass: 'ultra-rare', imageEmoji: '👑', description: 'Pass VIP permanent pour School Fr RP. Accès à toutes les zones VIP, salaires x2.', searchFor: 'Aura de Fondateur + un véhicule rare', sellerId: 'user3', sellerName: 'TheoGamer', sellerAvatar: 'T', sellerRating: 4.6, sellerTrades: 7, views: 892, likes: 45, likedBy: [], date: '2026-05-12' },
-    { id: 3, gameId: 'adoptme', gameName: 'Adopt Me !', title: 'Girafe Néon Volante', rarity: 'Légendaire', rarityClass: 'legendary', imageEmoji: '🦒', description: 'Girafe néon volante et chevauchable. Full grown. Plus disponible dans les œufs.', searchFor: 'Chien de l\'ombre néon ou plusieurs légendaires', sellerId: 'user4', sellerName: 'SarahPets', sellerAvatar: 'S', sellerRating: 5.0, sellerTrades: 23, views: 2301, likes: 156, likedBy: [], date: '2026-05-08' },
-    { id: 4, gameId: 'mm2', gameName: 'Murder Mystery 2', title: 'Chroma Darkbringer', rarity: 'Légendaire', rarityClass: 'legendary', imageEmoji: '🗡️', description: 'Couteau Chroma Darkbringer. Change de couleur. Un des chromas les plus recherchés.', searchFor: 'Chroma Lightbringer ou Godly rare', sellerId: 'user5', sellerName: 'KnifeKing', sellerAvatar: 'K', sellerRating: 4.7, sellerTrades: 31, views: 1560, likes: 102, likedBy: [], date: '2026-05-13' },
-    { id: 5, gameId: 'schoolfr', gameName: 'School Fr RP', title: 'Scooter de Direction Bleu', rarity: 'Rare', rarityClass: 'rare', imageEmoji: '🛴', description: 'Scooter de direction bleu. Plus rapide que les scooters normaux.', searchFor: 'Tenue de professeur ou accessoire rare', sellerId: 'user2', sellerName: 'EmmaDubois', sellerAvatar: 'E', sellerRating: 4.9, sellerTrades: 15, views: 445, likes: 23, likedBy: [], date: '2026-05-14' },
-    { id: 6, gameId: 'petsim', gameName: 'Pet Simulator X', title: 'Huge Cat Doré', rarity: 'Légendaire', rarityClass: 'legendary', imageEmoji: '🐱', description: 'Huge Cat version dorée. Stats de dégâts énormes. Extrêmement rare.', searchFor: 'Autre Huge ou Titan', sellerId: 'user3', sellerName: 'TheoGamer', sellerAvatar: 'T', sellerRating: 4.6, sellerTrades: 7, views: 980, likes: 67, likedBy: [], date: '2026-05-11' },
-    { id: 7, gameId: 'bloxfruits', gameName: 'Blox Fruits', title: 'Dragon Fruit Éveillé', rarity: 'Légendaire', rarityClass: 'legendary', imageEmoji: '🍎', description: 'Fruit du Dragon éveillé. Transformation en dragon. Ultra puissant.', searchFor: 'Fruit Léopard éveillé ou offre équivalente', sellerId: 'user4', sellerName: 'SarahPets', sellerAvatar: 'S', sellerRating: 5.0, sellerTrades: 23, views: 1850, likes: 134, likedBy: [], date: '2026-05-09' },
-    { id: 8, gameId: 'schoolfr', gameName: 'School Fr RP', title: 'Maison de Luxe avec Piscine', rarity: 'Ultra-Rare', rarityClass: 'ultra-rare', imageEmoji: '🏠', description: 'Grande maison de luxe avec piscine, garage 3 places, jardin. Entièrement meublée.', searchFor: '2 auras légendaires ou offre équivalente', sellerId: 'user5', sellerName: 'KnifeKing', sellerAvatar: 'K', sellerRating: 4.7, sellerTrades: 31, views: 670, likes: 34, likedBy: [], date: '2026-05-14' },
-    { id: 9, gameId: 'adoptme', gameName: 'Adopt Me !', title: 'Œuf de Noël 2019 (Non Ouvert)', rarity: 'Ultra-Rare', rarityClass: 'ultra-rare', imageEmoji: '🥚', description: 'Œuf de Noël 2019 non ouvert. Contient des légendaires exclusifs. Pièce de collection.', searchFor: 'Plusieurs légendaires ou offre collectionneur', sellerId: 'user2', sellerName: 'EmmaDubois', sellerAvatar: 'E', sellerRating: 4.9, sellerTrades: 15, views: 2100, likes: 178, likedBy: [], date: '2026-05-07' },
-];
+let announces = [];
+let messages = [];
 
-let messages = [
-    { id: 1, announceId: 1, fromUserId: 'user1', toUserId: 'user2', content: 'Salut ! Ton Aura Légendaire m\'intéresse. Je peux proposer mon Aura de Phénix Millénaire.', date: '2026-05-14T10:30:00', read: true },
-    { id: 2, announceId: 1, fromUserId: 'user2', toUserId: 'user1', content: 'Coucou ! L\'Aura de Phénix ça me tente bien. Tu peux me montrer en jeu ?', date: '2026-05-14T10:45:00', read: false },
-    { id: 3, announceId: 3, fromUserId: 'user3', toUserId: 'user1', content: 'Hello, intéressé par ton Pass VIP. J\'ai une Aura de Fondateur à échanger.', date: '2026-05-14T09:00:00', read: false },
-];
+let nextId = 1;
 
-let nextId = 10;
+
+let nextId = 1;
 let currentPage = 'home';
 let currentDetailId = null;
 let currentCreateStep = 1;
@@ -396,12 +383,12 @@ function prevStep() {
     if (currentCreateStep > 1) { currentCreateStep--; renderApp(); window.scrollTo({ top: 0, behavior: 'smooth' }); }
 }
 
-function publishAnnounce() {
+async function publishAnnounce() {
     const gameName = createData.otherGame || games.find(g => g.id === createData.gameId)?.name || createData.gameId;
     const rcMap = { 'Commun': 'common', 'Rare': 'rare', 'Ultra-Rare': 'ultra-rare', 'Légendaire': 'legendary', 'Mythique': 'legendary' };
     const emojiMap = { 'Commun': '⚪', 'Rare': '💙', 'Ultra-Rare': '💜', 'Légendaire': '⭐', 'Mythique': '🌟' };
-    announces.unshift({
-        id: nextId++,
+    
+    const newAnnounce = {
         gameId: createData.gameId,
         gameName: gameName,
         title: createData.title,
@@ -414,16 +401,32 @@ function publishAnnounce() {
         sellerName: currentUser.pseudo,
         sellerAvatar: currentUser.avatar,
         sellerRating: currentUser.rating,
-        sellerTrades: currentUser.totalTrades,
+        sellerTrades: currentUser.trades || 0,
         views: 0,
         likes: 0,
         likedBy: [],
         date: new Date().toISOString().split('T')[0],
-    });
-    currentUser.totalAnnounces++;
+    };
+
+    if (AuraAuth._supabase) {
+        try {
+            const { data, error } = await AuraAuth._supabase.from('announces').insert([newAnnounce]).select();
+            if (error) throw error;
+            announces.unshift(data[0]);
+        } catch (e) {
+            console.error('Supabase save failed:', e);
+            newAnnounce.id = Date.now();
+            announces.unshift(newAnnounce);
+        }
+    } else {
+        newAnnounce.id = Date.now();
+        announces.unshift(newAnnounce);
+    }
+
     showToast('✅ Annonce publiée avec succès !');
     navigate('home');
 }
+
 
 function renderExplore() {
     let filtered = announces;
@@ -559,16 +562,39 @@ function openContactModal(announceId) {
     overlay.addEventListener('click', e => { if (e.target === overlay) closeModal(); });
 }
 
-function sendContactMsg(announceId) {
+async function sendContactMsg(announceId) {
     const content = document.getElementById('contactMsg')?.value.trim();
     if (!content) return showToast('⚠️ Écris un message');
     const a = announces.find(ann => ann.id === announceId);
     if (!a) return;
-    messages.push({ id: messages.length + 1, announceId, fromUserId: currentUser.id, toUserId: a.sellerId, content, date: new Date().toISOString(), read: false });
+    
+    const newMsg = {
+        announceId,
+        fromUserId: currentUser.id,
+        toUserId: a.sellerId,
+        content,
+        date: new Date().toISOString(),
+        read: false
+    };
+
+    if (AuraAuth._supabase) {
+        try {
+            const { data, error } = await AuraAuth._supabase.from('messages').insert([newMsg]).select();
+            if (error) throw error;
+            messages.push(data[0]);
+        } catch (e) {
+            console.error('Send message failed:', e);
+            messages.push(newMsg);
+        }
+    } else {
+        messages.push(newMsg);
+    }
+
     closeModal();
     showToast('✅ Message envoyé à ' + a.sellerName);
     updateBadges();
 }
+
 
 function openChat(otherId) {
     const conv = messages.filter(m =>
@@ -604,7 +630,7 @@ function openChat(otherId) {
     setTimeout(() => { const t = document.getElementById('chatThread'); if (t) t.scrollTop = t.scrollHeight; }, 150);
 }
 
-function sendChatMsg(otherId) {
+async function sendChatMsg(otherId) {
     const input = document.getElementById('chatInput');
     const content = input?.value.trim();
     if (!content) return;
@@ -612,10 +638,36 @@ function sendChatMsg(otherId) {
         (m.fromUserId === currentUser.id && m.toUserId === otherId) ||
         (m.toUserId === currentUser.id && m.fromUserId === otherId)
     );
-    messages.push({ id: messages.length + 1, announceId: refMsg?.announceId || 1, fromUserId: currentUser.id, toUserId: otherId, content, date: new Date().toISOString(), read: true });
-    closeModal();
-    openChat(otherId);
+    
+    const newMsg = {
+        announceId: refMsg?.announceId || 1,
+        fromUserId: currentUser.id,
+        toUserId: otherId,
+        content,
+        date: new Date().toISOString(),
+        read: false
+    };
+
+    if (AuraAuth._supabase) {
+        try {
+            const { data, error } = await AuraAuth._supabase.from('messages').insert([newMsg]).select();
+            if (error) throw error;
+            messages.push(data[0]);
+            closeModal();
+            openChat(otherId);
+        } catch (e) {
+            console.error('Chat send failed:', e);
+            messages.push(newMsg);
+            closeModal();
+            openChat(otherId);
+        }
+    } else {
+        messages.push(newMsg);
+        closeModal();
+        openChat(otherId);
+    }
 }
+
 
 function closeModal() {
     const m = document.getElementById('activeModal');
@@ -674,10 +726,38 @@ function attachListeners() {
     }
 }
 
+// ==================== DATABASE ====================
+async function fetchAnnounces() {
+    if (!AuraAuth._supabase) return;
+    try {
+        const { data, error } = await AuraAuth._supabase.from('announces').select('*').order('date', { ascending: false });
+        if (error) throw error;
+        announces = data || [];
+        renderApp();
+    } catch (e) { console.error('Fetch failed:', e); }
+}
+
+async function fetchMessages() {
+    if (!AuraAuth._supabase || !currentUser.id) return;
+    try {
+        const { data, error } = await AuraAuth._supabase.from('messages')
+            .select('*')
+            .or(`fromUserId.eq.${currentUser.id},toUserId.eq.${currentUser.id}`)
+            .order('date', { ascending: false });
+        if (error) throw error;
+        messages = data || [];
+        updateBadges();
+    } catch (e) { console.error('Fetch messages failed:', e); }
+}
+
 // ==================== INIT ====================
-function init() {
+async function init() {
     refreshUserData();
+    await fetchAnnounces();
+    await fetchMessages();
+    
     const params = new URLSearchParams(window.location.search);
+
 
     const page = params.get('page');
     const id = params.get('id');
