@@ -1446,8 +1446,12 @@ async function fetchAnnounces() {
             }
         }
         
-        announces = validAnnounces;
-        renderApp();
+        const newHash = JSON.stringify(validAnnounces);
+        if (window._lastAnnHash !== newHash) {
+            window._lastAnnHash = newHash;
+            announces = validAnnounces;
+            if (currentPage === 'home' || currentPage === 'explore' || currentPage === 'profile') renderApp();
+        }
     } catch (e) { console.error('Fetch failed:', e); }
 }
 
@@ -1460,8 +1464,34 @@ async function fetchMessages() {
             .or(`fromUserId.eq.${currentUser.id},toUserId.eq.${currentUser.id}`)
             .order('date', { ascending: false });
         if (error) throw error;
-        messages = data || [];
-        updateBadges();
+        const newHash = JSON.stringify(data || []);
+        if (window._lastMsgHash !== newHash) {
+            window._lastMsgHash = newHash;
+            messages = data || [];
+            updateBadges();
+            if (currentPage === 'messages') renderApp();
+            
+            // Auto-refresh open chat without closing
+            const chatThread = document.getElementById('chatThread');
+            if (chatThread) {
+                const btn = document.querySelector('button[onclick^="sendChatMsg"]');
+                if (btn) {
+                    const otherId = btn.getAttribute('onclick').match(/'([^']+)'/)[1];
+                    const isAtBottom = chatThread.scrollHeight - chatThread.scrollTop <= chatThread.clientHeight + 10;
+                    
+                    const conv = messages.filter(m => (m.fromUserId === currentUser.id && m.toUserId === otherId) || (m.toUserId === currentUser.id && m.fromUserId === otherId)).sort((a,b) => new Date(a.date) - new Date(b.date));
+                    
+                    chatThread.innerHTML = conv.map(m => `
+                        <div class="msg-bubble ${m.fromUserId===currentUser.id?'sent':'received'}">
+                            ${m.content}
+                            <div class="time">${new Date(m.date).toLocaleTimeString('fr-FR',{hour:'2-digit',minute:'2-digit'})}</div>
+                        </div>
+                    `).join('');
+                    
+                    if (isAtBottom) chatThread.scrollTop = chatThread.scrollHeight;
+                }
+            }
+        }
     } catch (e) { console.error('Fetch messages failed:', e); }
 }
 
@@ -1470,6 +1500,12 @@ async function init() {
     refreshUserData();
     await fetchAnnounces();
     await fetchMessages();
+    
+    // Auto-refresh loop
+    setInterval(() => {
+        fetchAnnounces();
+        if (currentUser.id !== 'guest') fetchMessages();
+    }, 10000);
     
     // Check if user needs to set a pseudo
     if (currentUser.id !== 'guest' && !currentUser.pseudo) {
