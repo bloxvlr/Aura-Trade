@@ -53,11 +53,24 @@ function refreshUserData() {
                 avatarEl.textContent = '';
             }
         }
+        
+        // Update Premium Button
+        const premiumBtn = document.querySelector('.premium-header-btn');
+        if (premiumBtn) {
+            if (currentUser.is_premium) {
+                premiumBtn.innerHTML = '⚙️ Config Premium';
+                premiumBtn.onclick = () => navigate('config_premium');
+            } else {
+                premiumBtn.innerHTML = '⭐ Premium';
+                premiumBtn.onclick = () => navigate('premium');
+            }
+        }
     } else {
         if (userActions) userActions.style.display = 'none';
         if (loginBtn) loginBtn.style.display = 'block';
     }
 }
+
 
 
 
@@ -84,11 +97,12 @@ let activeGameFilter = null;
 // ==================== NAVIGATION ====================
 function navigate(page, param) {
     // Pages requiring authentication
-    const authRequired = ['detail', 'create', 'messages', 'profile', 'favorites', 'settings', 'admin'];
+    const authRequired = ['detail', 'create', 'messages', 'profile', 'favorites', 'settings', 'admin', 'config_premium'];
     if (authRequired.includes(page) && !AuraAuth.getUser()) {
         window.location.href = 'login.html';
         return;
     }
+
 
     currentPage = page;
     if (page === 'detail') currentDetailId = param;
@@ -126,7 +140,9 @@ function renderApp() {
         'settings': renderSettings,
         'admin': renderAdmin,
         'premium': renderPremium,
+        'config_premium': renderConfigPremium,
     };
+
 
 
     container.innerHTML = (pages[currentPage] || renderHome)();
@@ -145,10 +161,11 @@ function renderCard(a) {
     const isLiked = (a.likedBy || []).includes(currentUser.id);
     const imageStyle = a.imageUrl ? `background-image:url(${a.imageUrl}); background-size:cover;` : '';
     const premiumClass = a.sellerPremium ? 'premium-card' : '';
-    const pseudoClass = a.sellerPremium ? 'animated-pseudo' : '';
+    const pseudoClass = a.sellerPremium ? `animated-pseudo ${a.sellerPremiumStyle || 'anim-gold'}` : '';
     const badge = a.sellerPremium ? `<span class="premium-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></span>` : '';
     
     return `
+
     <div class="card ${premiumClass}" onclick="navigate('detail', ${a.id})">
         <div class="card-image ${a.rarityClass}" style="${imageStyle}">
             ${!a.imageUrl ? `<span class="item-emoji">${a.imageEmoji}</span>` : ''}
@@ -288,8 +305,9 @@ function renderDetail(id) {
                     <div class="seller-header">
                         <div class="avatar-md">${a.sellerAvatar}</div>
                         <div class="seller-meta">
-                            <div class="seller-name ${a.sellerPremium ? 'animated-pseudo' : ''}">${a.sellerName} ${a.sellerPremium ? '<span class="premium-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></span>' : ''}</div>
+                            <div class="seller-name ${a.sellerPremium ? `animated-pseudo ${a.sellerPremiumStyle || 'anim-gold'}` : ''}">${a.sellerName} ${a.sellerPremium ? '<span class="premium-badge"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor"><polyline points="20 6 9 17 4 12"/></svg></span>' : ''}</div>
                             <div class="seller-rating">
+
 
                                 ${icons.star} <span>${a.sellerRating || '5.0'}</span>
                                 <span class="dot">·</span>
@@ -498,7 +516,9 @@ async function publishAnnounce() {
         sellerRating: currentUser.rating,
         sellerTrades: currentUser.trades || 0,
         sellerPremium: currentUser.is_premium || false,
+        sellerPremiumStyle: currentUser.premium_style || 'anim-gold',
         views: 0,
+
         likes: 0,
 
         likedBy: [],
@@ -748,9 +768,15 @@ async function adminGrantPremiumByEmail() {
     if (!email) return showToast('⚠️ Entrez une adresse email');
     if (!AuraAuth._supabase) return showToast('❌ Supabase non connecté');
     
-    const { data, error } = await AuraAuth._supabase.from('profiles').update({ is_premium: true }).eq('email', email).select();
-    if (error) return showToast('❌ Erreur : ' + error.message);
-    if (!data || data.length === 0) return showToast('❌ Aucun utilisateur trouvé avec cet email');
+    // Fetch profile by email first
+    const { data: users, error: fetchErr } = await AuraAuth._supabase.from('profiles').select('id').eq('email', email);
+    if (fetchErr) return showToast('❌ Erreur de recherche : ' + fetchErr.message);
+    if (!users || users.length === 0) return showToast('❌ Aucun utilisateur trouvé avec cet email');
+    
+    const userId = users[0].id;
+    
+    const { error: updateErr } = await AuraAuth._supabase.from('profiles').update({ is_premium: true }).eq('id', userId);
+    if (updateErr) return showToast('❌ Erreur mise à jour : ' + updateErr.message);
     
     showToast('⭐ Premium accordé à ' + email);
     document.getElementById('adminGrantEmail').value = '';
@@ -758,6 +784,7 @@ async function adminGrantPremiumByEmail() {
         adminShowUsers();
     }
 }
+
 
 async function adminGrantPremium(userId) {
 
@@ -811,9 +838,79 @@ function renderPremium() {
     </div>
     `;
 }
+function renderConfigPremium() {
+    if (!currentUser.is_premium) return '<div class="container">Accès réservé aux membres Premium.</div>';
+    
+    const currentStyle = currentUser.premium_style || 'anim-gold';
+    
+    return `
+    <div class="container" style="max-width:600px;">
+        <h2 style="font-size:1.6rem;font-weight:800;color:#A23AFF;margin-bottom:24px;">⚙️ Configuration Premium</h2>
+        
+        <div class="sidebar-card" style="border:1px solid rgba(162,58,255,0.3); background:rgba(162,58,255,0.05);">
+            <h3 class="section-title" style="color:#A23AFF;">Apparence de votre Pseudo</h3>
+            <p style="color:var(--white-50);font-size:0.9rem;margin-bottom:16px;">Choisissez le dégradé animé qui apparaîtra sur toutes vos annonces et votre profil.</p>
+            
+            <div style="display:flex;flex-direction:column;gap:12px;margin-bottom:24px;">
+                <label style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+                    <input type="radio" name="premiumStyle" value="anim-gold" ${currentStyle === 'anim-gold' ? 'checked' : ''}>
+                    <span class="animated-pseudo anim-gold" style="font-size:1.2rem;">Or Classique</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+                    <input type="radio" name="premiumStyle" value="anim-rgb" ${currentStyle === 'anim-rgb' ? 'checked' : ''}>
+                    <span class="animated-pseudo anim-rgb" style="font-size:1.2rem;">Arc-en-ciel (RGB)</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+                    <input type="radio" name="premiumStyle" value="anim-purple" ${currentStyle === 'anim-purple' ? 'checked' : ''}>
+                    <span class="animated-pseudo anim-purple" style="font-size:1.2rem;">Élitis (Violet)</span>
+                </label>
+                <label style="display:flex;align-items:center;gap:12px;cursor:pointer;">
+                    <input type="radio" name="premiumStyle" value="anim-ocean" ${currentStyle === 'anim-ocean' ? 'checked' : ''}>
+                    <span class="animated-pseudo anim-ocean" style="font-size:1.2rem;">Océan Glacé</span>
+                </label>
+            </div>
+            
+            <button class="btn btn-purple" onclick="savePremiumConfig()">Sauvegarder mon Style</button>
+        </div>
+        
+        <div class="sidebar-card mt-4" style="border:1px solid rgba(255,215,0,0.3); background:rgba(255,215,0,0.05);">
+            <h3 class="section-title" style="color:#FFD700;">Avatar Animé (GIF)</h3>
+            <p style="color:var(--white-50);font-size:0.9rem;margin-bottom:16px;">Collez le lien direct (URL) d'un GIF pour l'utiliser comme photo de profil.</p>
+            <div class="form-group">
+                <input type="text" id="configAvatarUrl" value="${currentUser.picture || ''}" placeholder="https://exemple.com/mon-gif.gif">
+            </div>
+            <button class="btn btn-primary" style="background:#FFD700;color:#000;border:none;" onclick="savePremiumConfig()">Mettre à jour l'Avatar</button>
+        </div>
+    </div>
+    `;
+}
 
-
-
+async function savePremiumConfig() {
+    const styleRadios = document.getElementsByName('premiumStyle');
+    let selectedStyle = 'anim-gold';
+    for (const r of styleRadios) { if (r.checked) selectedStyle = r.value; }
+    
+    const newAvatar = document.getElementById('configAvatarUrl')?.value.trim() || currentUser.picture;
+    
+    currentUser.premium_style = selectedStyle;
+    currentUser.picture = newAvatar;
+    localStorage.setItem('aura_user', JSON.stringify(currentUser));
+    
+    if (AuraAuth._supabase) {
+        try {
+            await AuraAuth._supabase.from('profiles').update({ 
+                premium_style: selectedStyle,
+                avatar_url: newAvatar
+            }).eq('id', currentUser.id);
+            showToast('✨ Configuration Premium sauvegardée !');
+        } catch (e) {
+            console.error(e);
+            showToast('❌ Erreur de sauvegarde DB');
+        }
+    }
+    refreshUserData();
+    renderApp();
+}
 
 
 async function confirmDeleteAccount() {
