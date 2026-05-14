@@ -271,9 +271,9 @@ function renderDetail(id) {
     
     return `
     <div class="container">
-        <a class="back-link" onclick="navigate('explore')">
+        <a class="back-link" onclick="navigate('home')">
             <span class="icon-wrap-sm">${icons.arrowLeft}</span>
-            Retour aux annonces
+            Retour à l'accueil
         </a>
         
         <div class="detail-layout">
