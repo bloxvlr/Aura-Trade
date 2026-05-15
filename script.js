@@ -210,7 +210,7 @@ function renderHome() {
     // Premium announces get a large score boost to be at the top of featured
     const getScore = (a) => ((a.views || 0) + (a.likes || 0)*5) + (a.sellerPremium ? 10000 : 0);
     const featured = [...announces].sort((a, b) => getScore(b) - getScore(a)).slice(0, 5);
-    const recent = [...announces].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0)).slice(0, 6);
+    const recent = [...announces].sort((a, b) => new Date(b.date || 0) - new Date(a.date || 0));
 
 
     return `
@@ -244,8 +244,7 @@ function renderHome() {
 
         <section class="section">
             <div class="section-header">
-                <h2>${icons.clock} Dernières offres</h2>
-                <span class="section-link" onclick="navigate('explore')">Tout voir ${icons.chevronRight}</span>
+                <h2>${icons.clock} Toutes les annonces</h2>
             </div>
             <div class="grid-3">
                 ${recent.length > 0 ? recent.map(a => renderCard(a)).join('') : '<p class="empty-msg" style="grid-column: 1 / -1;">Aucune annonce publiée récemment.</p>'}
